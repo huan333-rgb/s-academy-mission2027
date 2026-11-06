@@ -17,12 +17,12 @@
     
     #cover-screen::before {
         content: ''; position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
-        background-image: url('https://lh3.googleusercontent.com/d/1I-ktKa-j2IiJaJKV_EcqfZSQvPQH0Jej'); 
+        background-image: url('https://lh3.googleusercontent.com/d/18DwDpi9FFdrmRfQ68NVYVIEQdVaEB2tq'); 
         background-size: cover; background-position: center; filter: blur(25px); opacity: 0.5; z-index: 1; pointer-events: none;
     }
     #cover-screen::after {
         content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background-image: url('https://lh3.googleusercontent.com/d/1I-ktKa-j2IiJaJKV_EcqfZSQvPQH0Jej'); 
+        background-image: url('https://lh3.googleusercontent.com/d/18DwDpi9FFdrmRfQ68NVYVIEQdVaEB2tq'); 
         background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2; pointer-events: none;
     }
     
@@ -39,7 +39,7 @@
         font-weight: 900;
         color: #fff;
         letter-spacing: 2px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.3);
@@ -68,11 +68,14 @@
     /* =========================================
        2. 二合一：選角與名字輸入介面
        ========================================= */
-    #setup-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1WsxUD0TJczWWhQwIPgQAPIeITjb7c9mN'); background-size: cover; background-position: center bottom; }
+    #setup-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1sD7WP3bpF_woE78NYWBWZVoJYJUPP0-j'); background-size: cover; background-position: center bottom; }
     
     .char-btn { position: absolute; z-index: 15; cursor: pointer; background-size: contain; background-repeat: no-repeat; background-position: center; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .char-btn:hover { transform: scale(1.15); filter: drop-shadow(0 0 15px rgba(255,255,255,0.8)) brightness(1.1); z-index: 20; }
-    .char-btn.silhouette { filter: brightness(0) opacity(0.5); transform: scale(0.9); }
+    
+    /* 【修正】剪影特效：改用灰階+降低亮度，不會在黑背景隱形 */
+    .char-btn.silhouette { filter: grayscale(100%) brightness(35%); opacity: 0.8; transform: scale(0.9); }
+    
     .char-btn.selected { transform: scale(1.15); filter: drop-shadow(0 0 25px var(--glow-color)) brightness(1.1); z-index: 20; }
 
     .capsule-box {
@@ -101,7 +104,7 @@
     /* 4. 遊戲場景 */
     #hud { position: absolute; top: 0; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; background: rgba(0,0,0,0.7); z-index: 5; font-size: 18px; font-weight: bold;}
     #play-area { width: 100%; height: 100%; position: relative; overflow: hidden; background: #0f1016; }
-    .city-bg { position: absolute; bottom: 0; width: 100%; height: 100%; background-image: url('https://lh3.googleusercontent.com/d/1mw0saLsPt6-nQMc-orDXMBWBVFNyvMaX'); background-size: cover; background-position: center bottom; z-index: 1; pointer-events: none; }
+    .city-bg { position: absolute; bottom: 0; width: 100%; height: 100%; background-image: url('https://lh3.googleusercontent.com/d/13M3Lg2Z-GcAWanuIUfzABK8Ll7WDLqWV'); background-size: cover; background-position: center bottom; z-index: 1; pointer-events: none; }
     
     .spawn-point { position: absolute; width: 150px; height: 150px; z-index: 2; overflow: visible; pointer-events: none;}
     .target { width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center bottom; cursor: crosshair; transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: translateY(100%) scale(0.5); opacity: 0; pointer-events: none;}
@@ -134,7 +137,7 @@
     @keyframes splatAnim { 0% { transform: scale(0.2) rotate(0deg); opacity: 1; } 100% { transform: scale(2.8) rotate(45deg); opacity: 0; } }
     
     /* 5. Game Over 介面 */
-    #game-over-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1dLuR_1G_VcjK8xQ2Ymh5-7jAQ4xYs54J'); background-size: cover; background-repeat: no-repeat; background-position: center; }
+    #game-over-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1gOhwyIemqFNcNiN3wHyMVRwDOHs7W8fs'); background-size: cover; background-repeat: no-repeat; background-position: center; }
 
     /* =========================================
        6. 結算卡牌介面
@@ -144,7 +147,7 @@
     .share-card { 
         width: 350px; 
         height: 480px; 
-        background-image: url('https://lh3.googleusercontent.com/d/1mw0saLsPt6-nQMc-orDXMBWBVFNyvMaX'); 
+        background-image: url('https://lh3.googleusercontent.com/d/13M3Lg2Z-GcAWanuIUfzABK8Ll7WDLqWV'); 
         background-size: cover; background-position: center bottom; border-radius: 24px; 
         border: 2px solid rgba(255, 255, 255, 0.7); 
         box-shadow: 0 0 20px rgba(0, 195, 255, 0.5), inset 0 0 30px rgba(0, 0, 0, 0.6);
@@ -248,7 +251,6 @@
     <!-- 第一步：封面 -->
     <div id="cover-screen" class="screen active">
         <div class="flash-overlay"></div>
-        <!-- 全新毛玻璃 PLAY 按鈕 -->
         <button class="glass-play-btn" onclick="showSetup()">PLAY ▶</button>
     </div>
     
