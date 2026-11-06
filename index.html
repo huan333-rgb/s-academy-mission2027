@@ -12,29 +12,63 @@
     
     .invisible-btn { position: absolute; left: 50%; transform: translateX(-50%); background: transparent; border: none; cursor: pointer; z-index: 20; }
     
-    /* 1. 封面介面 (動態毛玻璃滿版延伸技術) */
+    /* 1. 封面介面 (滿版適應與模糊背景延伸技術) */
     #cover-screen { background-color: #0b0c10; overflow: hidden; }
     
-    /* 模糊背景層：填滿黑邊，營造滿版沉浸感 */
     #cover-screen::before {
         content: ''; position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
-        background-image: url('https://lh3.googleusercontent.com/d/1fQ7ffrvU3Wlcuci-b2TEkMnwaID_sqtT'); 
+        background-image: url('https://lh3.googleusercontent.com/d/1I-ktKa-j2IiJaJKV_EcqfZSQvPQH0Jej'); 
         background-size: cover; background-position: center; filter: blur(25px); opacity: 0.5; z-index: 1; pointer-events: none;
     }
-    /* 主視覺層：絕對保持完美比例，永不變形 */
     #cover-screen::after {
         content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background-image: url('https://lh3.googleusercontent.com/d/1fQ7ffrvU3Wlcuci-b2TEkMnwaID_sqtT'); 
+        background-image: url('https://lh3.googleusercontent.com/d/1I-ktKa-j2IiJaJKV_EcqfZSQvPQH0Jej'); 
         background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2; pointer-events: none;
     }
     
     .flash-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; animation: flashAnim 3s infinite alternate; pointer-events: none; z-index: 5;}
     @keyframes flashAnim { 0% { opacity: 0; } 100% { opacity: 0.15; } }
 
+    /* 全新毛玻璃 PLAY 按鈕 (右下角) */
+    .glass-play-btn {
+        position: absolute;
+        bottom: 8%;
+        right: 8%;
+        padding: 12px 35px;
+        font-size: 22px;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: 2px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-top: 1px solid rgba(255, 255, 255, 0.5);
+        border-left: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 40px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255,255,255,0.1);
+        cursor: pointer;
+        z-index: 20;
+        transition: 0.3s;
+        text-transform: uppercase;
+        animation: playPulse 2.5s infinite alternate;
+    }
+    .glass-play-btn:hover {
+        transform: scale(1.05);
+        background: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 10px 30px rgba(0, 255, 204, 0.4), inset 0 0 15px rgba(255,255,255,0.3);
+        border-color: rgba(0, 255, 204, 0.6);
+        color: #00ffcc;
+    }
+    @keyframes playPulse {
+        0% { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); }
+        100% { box-shadow: 0 8px 25px rgba(0, 255, 204, 0.3); }
+    }
+
     /* =========================================
        2. 二合一：選角與名字輸入介面
        ========================================= */
-    #setup-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1GTlux96O05kD0ExyvP-r14C-CB5DhZGi'); background-size: cover; background-position: center bottom; }
+    #setup-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1WsxUD0TJczWWhQwIPgQAPIeITjb7c9mN'); background-size: cover; background-position: center bottom; }
     
     .char-btn { position: absolute; z-index: 15; cursor: pointer; background-size: contain; background-repeat: no-repeat; background-position: center; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .char-btn:hover { transform: scale(1.15); filter: drop-shadow(0 0 15px rgba(255,255,255,0.8)) brightness(1.1); z-index: 20; }
@@ -67,7 +101,7 @@
     /* 4. 遊戲場景 */
     #hud { position: absolute; top: 0; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; background: rgba(0,0,0,0.7); z-index: 5; font-size: 18px; font-weight: bold;}
     #play-area { width: 100%; height: 100%; position: relative; overflow: hidden; background: #0f1016; }
-    .city-bg { position: absolute; bottom: 0; width: 100%; height: 100%; background-image: url('https://lh3.googleusercontent.com/d/1GTlux96O05kD0ExyvP-r14C-CB5DhZGi'); background-size: cover; background-position: center bottom; z-index: 1; pointer-events: none; }
+    .city-bg { position: absolute; bottom: 0; width: 100%; height: 100%; background-image: url('https://lh3.googleusercontent.com/d/1mw0saLsPt6-nQMc-orDXMBWBVFNyvMaX'); background-size: cover; background-position: center bottom; z-index: 1; pointer-events: none; }
     
     .spawn-point { position: absolute; width: 150px; height: 150px; z-index: 2; overflow: visible; pointer-events: none;}
     .target { width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center bottom; cursor: crosshair; transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: translateY(100%) scale(0.5); opacity: 0; pointer-events: none;}
@@ -100,17 +134,17 @@
     @keyframes splatAnim { 0% { transform: scale(0.2) rotate(0deg); opacity: 1; } 100% { transform: scale(2.8) rotate(45deg); opacity: 0; } }
     
     /* 5. Game Over 介面 */
-    #game-over-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1qisHMQxbPxDT_aBMEHklRRkXCOBZm8T8'); background-size: cover; background-repeat: no-repeat; background-position: center; }
+    #game-over-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1dLuR_1G_VcjK8xQ2Ymh5-7jAQ4xYs54J'); background-size: cover; background-repeat: no-repeat; background-position: center; }
 
     /* =========================================
-       6. 結算卡牌介面 (一體化毛玻璃極致版)
+       6. 結算卡牌介面
        ========================================= */
     #end-screen { background: linear-gradient(to bottom, #0f1016, #16213e); overflow-y: auto; padding: 25px 0 80px 0; justify-content: flex-start;}
     
     .share-card { 
         width: 350px; 
         height: 480px; 
-        background-image: url('https://lh3.googleusercontent.com/d/1GTlux96O05kD0ExyvP-r14C-CB5DhZGi'); 
+        background-image: url('https://lh3.googleusercontent.com/d/1mw0saLsPt6-nQMc-orDXMBWBVFNyvMaX'); 
         background-size: cover; background-position: center bottom; border-radius: 24px; 
         border: 2px solid rgba(255, 255, 255, 0.7); 
         box-shadow: 0 0 20px rgba(0, 195, 255, 0.5), inset 0 0 30px rgba(0, 0, 0, 0.6);
@@ -213,10 +247,12 @@
 <div id="game-container">
     <!-- 第一步：封面 -->
     <div id="cover-screen" class="screen active">
-        <button class="invisible-btn" style="bottom: 5%; height: 18%; width: 60%; z-index: 20;" onclick="showSetup()"></button>
+        <div class="flash-overlay"></div>
+        <!-- 全新毛玻璃 PLAY 按鈕 -->
+        <button class="glass-play-btn" onclick="showSetup()">PLAY ▶</button>
     </div>
     
-    <!-- 第二步：二合一選角與名字介面 -->
+    <!-- 第二步：二合一選角與名字介面 (角色大幅放大) -->
     <div id="setup-screen" class="screen">
         
         <div class="char-btn" id="char-1" data-color="#ffff00" data-char="https://lh3.googleusercontent.com/d/1sWEvCS7vU9Eo52PTPmCX-BJLL3dIx6V9" style="background-image: url('https://lh3.googleusercontent.com/d/1sWEvCS7vU9Eo52PTPmCX-BJLL3dIx6V9'); top: 8%; left: 0%; width: 42%; height: 40%;"></div>
@@ -267,6 +303,7 @@
     <div id="end-screen" class="screen">
         
         <div class="share-card" id="share-card">
+            <!-- 頂部雙毛玻璃 UI 完美對齊 -->
             <div class="card-header">
                 <div class="card-stats glass-badge">
                     <span id="card-stat-score">分數: 0</span>
@@ -278,12 +315,14 @@
             <div class="glow-aura"></div>
             <div class="card-char" id="card-char"></div>
             
+            <!-- 底部一體化面板 -->
             <div class="card-bottom-panel glass-badge">
                 <div id="card-faction-display" class="card-faction"></div>
                 <div class="card-message" id="card-message"></div>
             </div>
         </div>
         
+        <!-- 全新緊湊按鈕群組設計 -->
         <div class="btn-group">
             <button class="action-btn btn-restart" onclick="resetGame()">重新挑戰</button>
             <a href="https://www.staracademy.com.tw/2027-winter-camp" target="_blank" class="action-btn btn-camp">前往S總部</a>
