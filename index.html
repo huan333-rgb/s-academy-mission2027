@@ -12,7 +12,20 @@
     
     .invisible-btn { position: absolute; left: 50%; transform: translateX(-50%); background: transparent; border: none; cursor: pointer; z-index: 20; }
     
-    /* 1. 封面介面 (滿版適應與模糊背景延伸技術) */
+    /* 品牌 LOGO 浮水印 (右上角全局) */
+    .global-logo {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 60px;
+        opacity: 0.45;
+        z-index: 100;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
+    }
+    
+    /* 1. 封面介面 */
     #cover-screen { background-color: #0b0c10; overflow: hidden; }
     
     #cover-screen::before {
@@ -29,7 +42,6 @@
     .flash-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; animation: flashAnim 3s infinite alternate; pointer-events: none; z-index: 5;}
     @keyframes flashAnim { 0% { opacity: 0; } 100% { opacity: 0.15; } }
 
-    /* 全新毛玻璃 PLAY 按鈕 (右下角) */
     .glass-play-btn {
         position: absolute;
         bottom: 8%;
@@ -39,7 +51,7 @@
         font-weight: 900;
         color: #fff;
         letter-spacing: 2px;
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.3);
@@ -65,17 +77,12 @@
         100% { box-shadow: 0 8px 25px rgba(0, 255, 204, 0.3); }
     }
 
-    /* =========================================
-       2. 二合一：選角與名字輸入介面
-       ========================================= */
+    /* 2. 二合一：選角與名字輸入介面 */
     #setup-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1sD7WP3bpF_woE78NYWBWZVoJYJUPP0-j'); background-size: cover; background-position: center bottom; }
     
     .char-btn { position: absolute; z-index: 15; cursor: pointer; background-size: contain; background-repeat: no-repeat; background-position: center; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .char-btn:hover { transform: scale(1.15); filter: drop-shadow(0 0 15px rgba(255,255,255,0.8)) brightness(1.1); z-index: 20; }
-    
-    /* 【修正】剪影特效：改用灰階+降低亮度，不會在黑背景隱形 */
     .char-btn.silhouette { filter: grayscale(100%) brightness(35%); opacity: 0.8; transform: scale(0.9); }
-    
     .char-btn.selected { transform: scale(1.15); filter: drop-shadow(0 0 25px var(--glow-color)) brightness(1.1); z-index: 20; }
 
     .capsule-box {
@@ -142,7 +149,8 @@
     /* =========================================
        6. 結算卡牌介面
        ========================================= */
-    #end-screen { background: linear-gradient(to bottom, #0f1016, #16213e); overflow-y: auto; padding: 25px 0 80px 0; justify-content: flex-start;}
+    /* 增加了 padding-bottom 確保底部 LOGO 有充足空間 */
+    #end-screen { background: linear-gradient(to bottom, #0f1016, #16213e); overflow-y: auto; padding: 25px 0 100px 0; justify-content: flex-start;}
     
     .share-card { 
         width: 350px; 
@@ -205,6 +213,15 @@
     .btn-copy { width: 100%; margin-top: 2px; background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05)); color: #fff; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 4px 15px rgba(0,0,0,0.3); padding: 14px; backdrop-filter: blur(5px);}
     .btn-copy:hover { background: rgba(255,255,255,0.25); transform: scale(1.02); }
 
+    /* 結算頁面底部 LOGO 專屬設定 */
+    .end-logo {
+        width: 60px;
+        opacity: 0.45;
+        margin-top: 15px;
+        pointer-events: none;
+        filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
+    }
+
     /* 排行榜 UI */
     #leaderboard-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 50; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
     .board-container { width: 85%; max-width: 400px; max-height: 80%; background: rgba(20,20,30,0.85); border: 1px solid rgba(0,255,204,0.4); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(0,255,204,0.2); }
@@ -225,7 +242,7 @@
 </style>
 </head>
 <body>
-<!-- 預載所有圖檔 -->
+<!-- 預載圖檔 (包含全新的LOGO) -->
 <div style="display:none;">
     <img src="https://lh3.googleusercontent.com/d/1UZoE9T9v-UXUEBUMPYPp_Qkd_mIUoM2H">
     <img src="https://lh3.googleusercontent.com/d/1XBJ0q8hogS6rvhQaCdvC69zGLvJh5A-y">
@@ -235,8 +252,10 @@
     <img src="https://lh3.googleusercontent.com/d/1wY3QxupYBjha1SdItXiRzFCHTVQLYdEB">
     <img src="https://lh3.googleusercontent.com/d/1vBwCbKiWIg2qpKp_c88wlCTG5pA04r6-">
     <img src="https://lh3.googleusercontent.com/d/1yvx_BbmQFOVz77iqKGGmVQYTY86EjxcQ">
+    <img src="https://lh3.googleusercontent.com/d/1ubF5fJs6JEBhojrfEH0nNKwSwCOtSgpu">
 </div>
 
+<!-- 排行榜浮動視窗 -->
 <div id="leaderboard-modal">
     <div class="board-container">
         <div class="board-title">🏆 S學院 特務排行榜</div>
@@ -248,13 +267,17 @@
 </div>
 
 <div id="game-container">
+    
+    <!-- 全局右上角 LOGO -->
+    <img src="https://lh3.googleusercontent.com/d/1ubF5fJs6JEBhojrfEH0nNKwSwCOtSgpu" id="global-logo" class="global-logo" alt="logo">
+
     <!-- 第一步：封面 -->
     <div id="cover-screen" class="screen active">
         <div class="flash-overlay"></div>
         <button class="glass-play-btn" onclick="showSetup()">PLAY ▶</button>
     </div>
     
-    <!-- 第二步：二合一選角與名字介面 (角色大幅放大) -->
+    <!-- 第二步：二合一選角與名字介面 -->
     <div id="setup-screen" class="screen">
         
         <div class="char-btn" id="char-1" data-color="#ffff00" data-char="https://lh3.googleusercontent.com/d/1sWEvCS7vU9Eo52PTPmCX-BJLL3dIx6V9" style="background-image: url('https://lh3.googleusercontent.com/d/1sWEvCS7vU9Eo52PTPmCX-BJLL3dIx6V9'); top: 8%; left: 0%; width: 42%; height: 40%;"></div>
@@ -305,7 +328,6 @@
     <div id="end-screen" class="screen">
         
         <div class="share-card" id="share-card">
-            <!-- 頂部雙毛玻璃 UI 完美對齊 -->
             <div class="card-header">
                 <div class="card-stats glass-badge">
                     <span id="card-stat-score">分數: 0</span>
@@ -317,14 +339,12 @@
             <div class="glow-aura"></div>
             <div class="card-char" id="card-char"></div>
             
-            <!-- 底部一體化面板 -->
             <div class="card-bottom-panel glass-badge">
                 <div id="card-faction-display" class="card-faction"></div>
                 <div class="card-message" id="card-message"></div>
             </div>
         </div>
         
-        <!-- 全新緊湊按鈕群組設計 -->
         <div class="btn-group">
             <button class="action-btn btn-restart" onclick="resetGame()">重新挑戰</button>
             <a href="https://www.staracademy.com.tw/2027-winter-camp" target="_blank" class="action-btn btn-camp">前往S總部</a>
@@ -332,6 +352,9 @@
             
             <button class="action-btn btn-copy" onclick="copyUrl()">點擊複製網址，叫朋友來挑戰吧！</button>
         </div>
+        
+        <!-- 結算專屬底部 LOGO -->
+        <img src="https://lh3.googleusercontent.com/d/1ubF5fJs6JEBhojrfEH0nNKwSwCOtSgpu" class="end-logo" alt="logo">
         
     </div>
 </div>
@@ -557,6 +580,10 @@
     function endGame() {
         clearInterval(gameTimer);
         clearInterval(spawnerTimer);
+        
+        // 隱藏全局右上角LOGO，讓底部專屬LOGO顯示
+        document.getElementById('global-logo').style.display = 'none';
+        
         document.getElementById('game-screen').classList.remove('active');
         document.getElementById('end-screen').classList.add('active');
         
@@ -598,6 +625,9 @@
     function resetGame() {
         clearInterval(gameTimer);
         clearInterval(spawnerTimer);
+        
+        // 恢復全局右上角LOGO
+        document.getElementById('global-logo').style.display = 'block';
         
         score = 0;
         mistakes = 0;
