@@ -299,7 +299,8 @@
     let chosenColor = '';
     let chosenCharUrl = '';
     let scoreAt15s = 0, fastBossKill = false;
-    const totalTargets = 48; 
+    // 55 個目標：45小 + 3大 + 5貓 + 2炸彈
+    const totalTargets = 55; 
     let targetsSpawned = 0, spawnQueue = [];
 
     function showSetup() {
@@ -364,10 +365,10 @@
 
     function buildQueue() {
         spawnQueue = [];
-        for(let i=0; i<40; i++) spawnQueue.push('slime');
-        for(let i=0; i<2; i++) spawnQueue.push('boss');
+        for(let i=0; i<45; i++) spawnQueue.push('slime');
+        for(let i=0; i<3; i++) spawnQueue.push('boss');
         spawnQueue.push('cat1', 'cat2', 'cat3', 'cat4', 'cat5');
-        spawnQueue.push('bomb');
+        for(let i=0; i<2; i++) spawnQueue.push('bomb');
         spawnQueue.sort(() => Math.random() - 0.5);
     }
 
@@ -385,7 +386,8 @@
             }, {passive: false});
         });
         gameTimer = setInterval(updateTime, 100);
-        spawnerTimer = setInterval(spawnTarget, 600); 
+        // 生成速度加快為 0.5 秒一隻
+        spawnerTimer = setInterval(spawnTarget, 500); 
     }
 
     function updateTime() {
@@ -518,20 +520,20 @@
         const pName = document.getElementById('playerName').value;
         let finalFaction = "", message = "";
         
-        if(score >= 42 && mistakes === 0) {
-            finalFaction = "S-Power 總部";
+        if(score >= 48 && mistakes === 0) {
+            finalFaction = "S-Power 總部指揮官";
             message = "【完美通關】近乎零失誤的頂尖特務！你是守護城市的終極傳說！";
         } else if (fastBossKill) {
-            finalFaction = "Shinie 駭客基地";
+            finalFaction = "駭客基地速駭員";
             message = "【極限反射】頭目出現瞬間就將其擊潰！你的動態視力超越常人！";
         } else if (scoreAt15s >= 20 && score >= 30) {
-            finalFaction = "Kion 探索實驗室";
+            finalFaction = "火箭爆發實驗室";
             message = "【開局爆發】遊戲前半段展現了壓倒性的攻擊節奏，標準的衝鋒陷陣型英雄！";
         } else if (mistakes === 0 && score >= 20) {
-            finalFaction = "Kiona 自然研究所";
-            message = "【和平護衛】戰鬥中堅持零誤擊，保護了所有城市貓咪，心思細膩的溫柔特務！";
+            finalFaction = "和平自然研究所";
+            message = "【和平護衛】戰鬥中堅持零誤擊，保護了所有城市居民，心思細膩的溫柔特務！";
         } else {
-            finalFaction = "Brownie 幻彩工作室";
+            finalFaction = "幻彩工作室的瘋狂藝術家";
             message = "【自由揮灑】不按牌理出牌的藝術家！你專屬的漆彈色彩為這座城市帶來了新的活力！";
         }
         
