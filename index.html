@@ -91,7 +91,8 @@
     /* =========================================
        6. 結算卡牌介面 (一體化毛玻璃極致版)
        ========================================= */
-    #end-screen { background: linear-gradient(to bottom, #0f1016, #16213e); overflow-y: auto; padding: 25px 0; justify-content: center;}
+    /* 增加 padding-bottom 確保底部按鈕不被遮擋 */
+    #end-screen { background: linear-gradient(to bottom, #0f1016, #16213e); overflow-y: auto; padding: 25px 0 80px 0; justify-content: flex-start;}
     
     .share-card { 
         width: 350px; height: 530px; 
@@ -100,6 +101,7 @@
         border: 2px solid rgba(255, 255, 255, 0.7); 
         box-shadow: 0 0 20px rgba(0, 195, 255, 0.5), inset 0 0 30px rgba(0, 0, 0, 0.6);
         position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; 
+        flex-shrink: 0; /* 防止卡牌被擠壓 */
     }
     
     /* 替卡牌底部加入深色漸層陰影，確保文字清晰與重心穩定 */
@@ -144,8 +146,8 @@
     /* =========================================
        按鈕群組 (乾淨無 emoji、加入新按鈕)
        ========================================= */
-    .btn-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 25px; z-index: 20; max-width: 350px;}
-    .action-btn { padding: 12px 22px; font-size: 16px; font-weight: bold; border: none; border-radius: 25px; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;}
+    .btn-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; z-index: 20; max-width: 350px;}
+    .action-btn { padding: 12px 20px; font-size: 15px; font-weight: bold; border: none; border-radius: 25px; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;}
     
     .btn-restart { background: #333; color: white; border: 1px solid rgba(255,255,255,0.2); }
     .btn-restart:hover { background: #444; }
@@ -299,7 +301,6 @@
     let chosenColor = '';
     let chosenCharUrl = '';
     let scoreAt15s = 0, fastBossKill = false;
-    // 55 個目標：45小 + 3大 + 5貓 + 2炸彈
     const totalTargets = 55; 
     let targetsSpawned = 0, spawnQueue = [];
 
@@ -386,7 +387,6 @@
             }, {passive: false});
         });
         gameTimer = setInterval(updateTime, 100);
-        // 生成速度加快為 0.5 秒一隻
         spawnerTimer = setInterval(spawnTarget, 500); 
     }
 
