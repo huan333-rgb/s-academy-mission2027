@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Fantastic S Academy - Mission</title>
+<style>
+    body, html { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: white; overflow: hidden; touch-action: manipulation; }
+    #game-container { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+    .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; flex-direction: column; align-items: center; justify-content: center; z-index: 10;}
+    .screen.active { display: flex; }
+    
+    .invisible-btn { position: absolute; left: 50%; transform: translateX(-50%); background: transparent; border: none; cursor: pointer; z-index: 20; }
+    
+    /* 1. 封面介面 */
+    #cover-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1fQ7ffrvU3Wlcuci-b2TEkMnwaID_sqtT'); background-size: contain; background-repeat: no-repeat; background-position: center; }
+    .flash-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; animation: flashAnim 3s infinite alternate; pointer-events: none;}
+    @keyframes flashAnim { 0% { opacity: 0; } 100% { opacity: 0.15; } }
+
+    /* =========================================
+       2. 二合一：選角與名字輸入介面
+       ========================================= */
+    #setup-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1GTlux96O05kD0ExyvP-r14C-CB5DhZGi'); background-size: cover; background-position: center bottom; }
+    
+    .char-btn { position: absolute; z-index: 15; cursor: pointer; background-size: contain; background-repeat: no-repeat; background-position: center; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .char-btn:hover { transform: scale(1.15); filter: drop-shadow(0 0 15px rgba(255,255,255,0.8)) brightness(1.1); z-index: 20; }
+    .char-btn.silhouette { filter: brightness(0) opacity(0.5); transform: scale(0.9); }
+    .char-btn.selected { transform: scale(1.15); filter: drop-shadow(0 0 25px var(--glow-color)) brightness(1.1); z-index: 20; }
+
+    .capsule-box {
+        position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%);
+        width: 75%; max-width: 320px; height: 60px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0.05));
+        border: 2px solid rgba(255,255,255,0.5); border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.2);
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        display: flex; justify-content: center; align-items: center; z-index: 10; transition: 0.3s;
+    }
+    
+    #select-hint { color: white; font-size: 16px; font-weight: bold; text-shadow: 0 2px 4px black; margin: 0; pointer-events: none; letter-spacing: 0.5px; text-align: center;}
+    
+    input[type="text"] { background: transparent; border: none; color: white; font-size: 24px; font-weight: bold; text-align: center; outline: none; width: 90%; text-shadow: 0 2px 5px rgba(0,0,0,0.8); display: none; }
+    input[type="text"]::placeholder { color: rgba(255,255,255,0.7); text-shadow: none; font-size: 20px; font-weight: normal;}
+    
+    .continue-hint { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); color: white; font-size: 24px; font-weight: bold; letter-spacing: 1px; cursor: pointer; padding: 12px 30px; border-radius: 40px; background: rgba(0,0,0,0.7); border: 2px solid rgba(255,255,255,0.4); backdrop-filter: blur(5px); z-index: 25; animation: floatHint 2s ease-in-out infinite; text-shadow: 0 2px 5px black; white-space: nowrap; box-shadow: 0 10px 20px rgba(0,0,0,0.5);}
+    @keyframes floatHint { 0%, 100% { transform: translate(-50%, 0); box-shadow: 0 10px 20px rgba(0,0,0,0.5); } 50% { transform: translate(-50%, -15px); box-shadow: 0 20px 25px rgba(0,0,0,0.3); } }
+
+    /* 3. 倒數介面 */
+    #countdown-screen { background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column; justify-content: center; align-items: center; }
+    #countdown-text { font-size: 150px; font-weight: 900; color: #f2a900; text-shadow: 0 0 30px rgba(242,169,0,0.8); animation: popIn 1s infinite; }
+    @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+    
+    /* 4. 遊戲場景 */
+    #hud { position: absolute; top: 0; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; background: rgba(0,0,0,0.7); z-index: 5; font-size: 18px; font-weight: bold;}
+    #play-area { width: 100%; height: 100%; position: relative; overflow: hidden; background: #0f1016; }
+    .city-bg { position: absolute; bottom: 0; width: 100%; height: 100%; background-image: url('https://lh3.googleusercontent.com/d/1GTlux96O05kD0ExyvP-r14C-CB5DhZGi'); background-size: cover; background-position: center bottom; z-index: 1; pointer-events: none; }
+    
+    .spawn-point { position: absolute; width: 150px; height: 150px; z-index: 2; overflow: visible; pointer-events: none;}
+    .target { width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center bottom; cursor: crosshair; transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: translateY(100%) scale(0.5); opacity: 0; pointer-events: none;}
+    .target.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+    
+    @keyframes damageShake { 0% { transform: translate(4px, 4px) rotate(0deg); } 25% { transform: translate(-4px, -4px) rotate(-3deg); } 50% { transform: translate(-4px, 4px) rotate(3deg); } 75% { transform: translate(4px, -4px) rotate(0deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+    .target.damaged { animation: damageShake 0.2s; filter: brightness(1.5) saturate(1.5); }
+    
+    /* 圖庫 */
+    .target.slime { background-image: url('https://lh3.googleusercontent.com/d/16E7E5XBTVf5LQDOLXbfHex11zQxGNiYL'); }
+    .target.slime.hit { background-image: url('https://lh3.googleusercontent.com/d/1UZoE9T9v-UXUEBUMPYPp_Qkd_mIUoM2H'); pointer-events: none;}
+    .target.boss { background-image: url('https://lh3.googleusercontent.com/d/1VwhWjVL7jp8d1oH3XX1pZD1IIvDCncf3'); width: 190px; height: 190px; left: -20px; top: -30px; position: relative;}
+    .target.boss.hit { background-image: url('https://lh3.googleusercontent.com/d/1XBJ0q8hogS6rvhQaCdvC69zGLvJh5A-y'); pointer-events: none;}
+    .target.bomb { background-image: url('https://lh3.googleusercontent.com/d/1yvx_BbmQFOVz77iqKGGmVQYTY86EjxcQ'); }
+    
+    .target.cat1 { background-image: url('https://lh3.googleusercontent.com/d/1sWEvCS7vU9Eo52PTPmCX-BJLL3dIx6V9'); }
+    .target.cat1.hit { background-image: url('https://lh3.googleusercontent.com/d/1C6yl_lFWl8hiOZkRcBwfw-6cmdVnyco-'); transform: translateY(-10px) scale(1.1); pointer-events: none;}
+    .target.cat2 { background-image: url('https://lh3.googleusercontent.com/d/1O8TdHGd5j7SEAYv3h5HrvMnP6-Z7RgpB'); }
+    .target.cat2.hit { background-image: url('https://lh3.googleusercontent.com/d/1oqICWu51OyAl8GEyW3_ptxbVjKMTPues'); transform: translateY(-10px) scale(1.1); pointer-events: none;}
+    .target.cat3 { background-image: url('https://lh3.googleusercontent.com/d/1ATpnd1_I6ssa9e2MXuIvuLzweoMCXwG0'); }
+    .target.cat3.hit { background-image: url('https://lh3.googleusercontent.com/d/1-P-NU-yTPI3RjxklbgmwFhSXvg6EftHf'); transform: translateY(-10px) scale(1.1); pointer-events: none;}
+    .target.cat4 { background-image: url('https://lh3.googleusercontent.com/d/1XJYk0NNkSGjKZB7WBhuH3awZkp8XFIbu'); }
+    .target.cat4.hit { background-image: url('https://lh3.googleusercontent.com/d/1wY3QxupYBjha1SdItXiRzFCHTVQLYdEB'); transform: translateY(-10px) scale(1.1); pointer-events: none;}
+    .target.cat5 { background-image: url('https://lh3.googleusercontent.com/d/1FWbVVJk73_KAWAFMEkde_x5eOwHiDnyy'); }
+    .target.cat5.hit { background-image: url('https://lh3.googleusercontent.com/d/1vBwCbKiWIg2qpKp_c88wlCTG5pA04r6-'); transform: translateY(-10px) scale(1.1); pointer-events: none;}
+
+    .float-text { position: absolute; font-weight: bold; font-size: 30px; pointer-events: none; animation: floatUp 1s ease-out forwards; z-index: 15; text-shadow: 2px 2px 5px black; white-space: nowrap; left: 50%; transform: translateX(-50%);}
+    @keyframes floatUp { 0% { opacity: 1; top: -10px; } 100% { opacity: 0; top: -80px; } }
+    .splat { position: absolute; width: 100px; height: 100px; border-radius: 50%; opacity: 0.8; pointer-events: none; animation: splatAnim 0.6s ease-out forwards; z-index: 12; mix-blend-mode: overlay; left: 25px; top: 25px;}
+    @keyframes splatAnim { 0% { transform: scale(0.2) rotate(0deg); opacity: 1; } 100% { transform: scale(2.8) rotate(45deg); opacity: 0; } }
+    
+    /* 5. Game Over 介面 */
+    #game-over-screen { background-color: #0b0c10; background-image: url('https://lh3.googleusercontent.com/d/1qisHMQxbPxDT_aBMEHklRRkXCOBZm8T8'); background-size: contain; background-repeat: no-repeat; background-position: center; }
+
+    /* =========================================
+       6. 結算卡牌介面 (一體化毛玻璃極致版)
+       ========================================= */
+    #end-screen { background: linear-gradient(to bottom, #0f1016, #16213e); overflow-y: auto; padding: 25px 0; justify-content: center;}
+    
+    .share-card { 
+        width: 350px; height: 530px; 
+        background-image: url('https://lh3.googleusercontent.com/d/1GTlux96O05kD0ExyvP-r14C-CB5DhZGi'); 
+        background-size: cover; background-position: center bottom; border-radius: 24px; 
+        border: 2px solid rgba(255, 255, 255, 0.7); 
+        box-shadow: 0 0 20px rgba(0, 195, 255, 0.5), inset 0 0 30px rgba(0, 0, 0, 0.6);
+        position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; 
+    }
+    
+    /* 替卡牌底部加入深色漸層陰影，確保文字清晰與重心穩定 */
+    .share-card::after {
+        content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 55%;
+        background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, transparent 100%);
+        z-index: 1; pointer-events: none;
+    }
+    
+    /* 頂部雙 UI 對齊 */
+    .card-header { width: 90%; display: flex; justify-content: space-between; align-items: flex-start; margin-top: 18px; z-index: 10; }
+    
+    /* 統一的毛玻璃 UI 組件 (戰績框、名字框、底部面板共用) */
+    .glass-badge { 
+        background: rgba(255, 255, 255, 0.08); 
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
+        border: 1px solid rgba(255, 255, 255, 0.3); 
+        border-top: 1px solid rgba(255, 255, 255, 0.5); 
+        border-left: 1px solid rgba(255, 255, 255, 0.5); 
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); 
+        border-radius: 14px; 
+    }
+    
+    .card-stats { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; font-weight: 900; font-size: 15px; letter-spacing: 1px; }
+    #card-stat-score { color: #00ffcc; text-shadow: 0 0 6px rgba(0,255,204,0.5); }
+    #card-stat-miss { color: #ff4c4c; text-shadow: 0 0 6px rgba(255,76,76,0.5); }
+
+    /* 名字優化：套用統一毛玻璃外觀，不再突兀 */
+    .card-name { padding: 10px 18px; font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+    .glow-aura { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 70%); z-index: 2; pointer-events: none; animation: auraBreathe 4s infinite alternate ease-in-out; }
+    @keyframes auraBreathe { 0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.6; } 100% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } }
+    
+    .card-char { position: absolute; bottom: 27%; width: 250px; height: 250px; background-size: contain; background-repeat: no-repeat; background-position: center bottom; z-index: 5; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.6)); animation: floatCard 3s ease-in-out infinite; }
+    @keyframes floatCard { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+    /* 底部一體化面板 (取代原本分離的膠囊與方塊) */
+    .card-bottom-panel { position: absolute; bottom: 15px; width: 85%; display: flex; flex-direction: column; align-items: center; padding: 15px 18px; z-index: 10; box-sizing: border-box;}
+    .card-faction { font-size: 20px; font-weight: bold; color: #00ffcc; text-shadow: 0 0 8px rgba(0,255,204,0.6); margin-bottom: 8px; letter-spacing: 1px;}
+    .card-message { font-size: 16px; line-height: 1.6; color: #fff; text-align: justify; text-shadow: 0 1px 3px black; margin: 0; }
+
+    /* =========================================
+       按鈕群組 (乾淨無 emoji、加入新按鈕)
+       ========================================= */
+    .btn-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 25px; z-index: 20; max-width: 350px;}
+    .action-btn { padding: 12px 22px; font-size: 16px; font-weight: bold; border: none; border-radius: 25px; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;}
+    
+    .btn-restart { background: #333; color: white; border: 1px solid rgba(255,255,255,0.2); }
+    .btn-restart:hover { background: #444; }
+    
+    .btn-camp { background: linear-gradient(135deg, rgba(233,69,96,0.9), rgba(176,42,67,0.9)); color: white; box-shadow: 0 4px 15px rgba(233,69,96,0.4); border: 1px solid rgba(255,255,255,0.3);}
+    .btn-camp:hover { transform: scale(1.05); }
+    
+    .btn-board { background: #f2a900; color: #0b0c10; box-shadow: 0 4px 15px rgba(242,169,0,0.4); }
+    .btn-board:hover { transform: scale(1.05); }
+
+    /* 第四顆：點擊複製網址質感按鈕 */
+    .btn-copy { width: 100%; margin-top: 5px; background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05)); color: #fff; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 4px 15px rgba(0,0,0,0.3); padding: 14px; backdrop-filter: blur(5px);}
+    .btn-copy:hover { background: rgba(255,255,255,0.25); transform: scale(1.02); }
+
+    /* 排行榜 UI */
+    #leaderboard-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 50; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+    .board-container { width: 85%; max-width: 400px; max-height: 80%; background: rgba(20,20,30,0.85); border: 1px solid rgba(0,255,204,0.4); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(0,255,204,0.2); }
+    .board-title { color: #00ffcc; font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 15px; text-shadow: 0 0 10px rgba(0,255,204,0.5); }
+    .board-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px; }
+    .board-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 10px; border-left: 4px solid #00ffcc; }
+    .board-item.top-1 { border-color: #ffd700; background: rgba(255,215,0,0.15); box-shadow: 0 0 10px rgba(255,215,0,0.2);}
+    .board-item.top-2 { border-color: #c0c0c0; background: rgba(192,192,192,0.1); }
+    .board-item.top-3 { border-color: #cd7f32; background: rgba(205,127,50,0.1); }
+    .item-name { color: white; font-weight: bold; font-size: 16px; display: block; margin-bottom: 2px;}
+    .item-faction { color: #aaa; font-size: 12px; display: block;}
+    .item-score { color: #00ffcc; font-weight: bold; font-size: 22px; }
+    .top-1 .item-score { color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.5);}
+    .top-2 .item-score { color: #c0c0c0; }
+    .top-3 .item-score { color: #cd7f32; }
+    .close-board-btn { margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; text-align: center;}
+    .close-board-btn:hover { background: rgba(255,255,255,0.2); }
+</style>
+</head>
+<body>
+<!-- 預載所有圖檔 -->
+<div style="display:none;">
+    <img src="https://lh3.googleusercontent.com/d/1UZoE9T9v-UXUEBUMPYPp_Qkd_mIUoM2H">
+    <img src="https://lh3.googleusercontent.com/d/1XBJ0q8hogS6rvhQaCdvC69zGLvJh5A-y">
+    <img src="https://lh3.googleusercontent.com/d/1C6yl_lFWl8hiOZkRcBwfw-6cmdVnyco-">
+    <img src="https://lh3.googleusercontent.com/d/1oqICWu51OyAl8GEyW3_ptxbVjKMTPues">
+    <img src="https://lh3.googleusercontent.com/d/1-P-NU-yTPI3RjxklbgmwFhSXvg6EftHf">
+    <img src="https://lh3.googleusercontent.com/d/1wY3QxupYBjha1SdItXiRzFCHTVQLYdEB">
+    <img src="https://lh3.googleusercontent.com/d/1vBwCbKiWIg2qpKp_c88wlCTG5pA04r6-">
+    <img src="https://lh3.googleusercontent.com/d/1yvx_BbmQFOVz77iqKGGmVQYTY86EjxcQ">
+</div>
+
+<div id="leaderboard-modal">
+    <div class="board-container">
+        <div class="board-title">🏆 S學院 特務排行榜</div>
+        <div class="board-list" id="leaderboard-list">
+            <div style="color:white; text-align:center; padding: 30px;">訊號連線中...</div>
+        </div>
+        <button class="close-board-btn" onclick="closeLeaderboard()">關閉面板</button>
+    </div>
+</div>
+
+<div id="game-container">
+    <!-- 第一步：封面 -->
+    <div id="cover-screen" class="screen active">
+        <div class="flash-overlay"></div>
+        <button class="invisible-btn" style="bottom: 5%; height: 18%; width: 60%;" onclick="showSetup()"></button>
+    </div>
+    
+    <!-- 第二步：二合一選角與名字介面 (角色大幅放大) -->
+    <div id="setup-screen" class="screen">
+        
+        <div class="char-btn" id="char-1" data-color="#ffff00" data-char="https://lh3.googleusercontent.com/d/1sWEvCS7vU9Eo52PTPmCX-BJLL3dIx6V9" style="background-image: url('https://lh3.googleusercontent.com/d/1sWEvCS7vU9Eo52PTPmCX-BJLL3dIx6V9'); top: 8%; left: 0%; width: 42%; height: 40%;"></div>
+        <div class="char-btn" id="char-2" data-color="#ff4c4c" data-char="https://lh3.googleusercontent.com/d/1FWbVVJk73_KAWAFMEkde_x5eOwHiDnyy" style="background-image: url('https://lh3.googleusercontent.com/d/1FWbVVJk73_KAWAFMEkde_x5eOwHiDnyy'); top: 0%; left: 28%; width: 45%; height: 40%;"></div>
+        <div class="char-btn" id="char-3" data-color="#ff007f" data-char="https://lh3.googleusercontent.com/d/1XJYk0NNkSGjKZB7WBhuH3awZkp8XFIbu" style="background-image: url('https://lh3.googleusercontent.com/d/1XJYk0NNkSGjKZB7WBhuH3awZkp8XFIbu'); top: 8%; left: 58%; width: 42%; height: 40%;"></div>
+        <div class="char-btn" id="char-4" data-color="#39ff14" data-char="https://lh3.googleusercontent.com/d/1ATpnd1_I6ssa9e2MXuIvuLzweoMCXwG0" style="background-image: url('https://lh3.googleusercontent.com/d/1ATpnd1_I6ssa9e2MXuIvuLzweoMCXwG0'); top: 52%; left: 5%; width: 45%; height: 40%;"></div>
+        <div class="char-btn" id="char-5" data-color="#00ffcc" data-char="https://lh3.googleusercontent.com/d/1O8TdHGd5j7SEAYv3h5HrvMnP6-Z7RgpB" style="background-image: url('https://lh3.googleusercontent.com/d/1O8TdHGd5j7SEAYv3h5HrvMnP6-Z7RgpB'); top: 52%; left: 50%; width: 45%; height: 40%;"></div>
+
+        <div class="capsule-box">
+            <div id="select-hint">Click on a character to select it</div>
+            <input type="text" id="playerName" placeholder="Your Name..." autocomplete="off">
+        </div>
+        
+        <div class="continue-hint" id="continue-btn" style="display:none;" onclick="submitSetup()">Click to Continue</div>
+    </div>
+
+    <!-- 第三步：倒數 -->
+    <div id="countdown-screen" class="screen">
+        <div id="countdown-text">3</div>
+    </div>
+
+    <!-- 第四步：射擊戰場 -->
+    <div id="game-screen" class="screen">
+        <div id="hud">
+            <div>TIME: <span id="time-display" style="color:#00ffcc;">30.0</span></div>
+            <div>SCORE: <span id="score-display">0</span></div>
+            <div>MISS: <span id="mistake-display" style="color: #ff4c4c;">0</span></div>
+        </div>
+        <div id="play-area">
+            <div class="city-bg"></div>
+            <div class="spawn-point" style="top: 25%; left: 10%;"></div>
+            <div class="spawn-point" style="top: 45%; left: 30%;"></div>
+            <div class="spawn-point" style="top: 30%; left: 55%;"></div>
+            <div class="spawn-point" style="top: 65%; left: 15%;"></div>
+            <div class="spawn-point" style="top: 55%; left: 65%;"></div>
+            <div class="spawn-point" style="top: 70%; left: 40%;"></div>
+            <div class="spawn-point" style="top: 20%; left: 70%;"></div>
+            <div class="spawn-point" style="top: 60%; left: 75%;"></div>
+        </div>
+    </div>
+    
+    <!-- 炸彈死局 -->
+    <div id="game-over-screen" class="screen">
+        <div class="continue-hint" onclick="resetGame()" style="bottom: 12%;">Click to Continue</div>
+    </div>
+
+    <!-- 第五步：結算卡牌直出 -->
+    <div id="end-screen" class="screen">
+        
+        <div class="share-card" id="share-card">
+            <!-- 頂部雙毛玻璃 UI 完美對齊 -->
+            <div class="card-header">
+                <div class="card-stats glass-badge">
+                    <span id="card-stat-score">分數: 0</span>
+                    <span id="card-stat-miss">誤擊: 0</span>
+                </div>
+                <div id="card-name" class="card-name glass-badge"></div>
+            </div>
+            
+            <div class="glow-aura"></div>
+            <div class="card-char" id="card-char"></div>
+            
+            <!-- 底部一體化面板 (解決破碎感，字體放大) -->
+            <div class="card-bottom-panel glass-badge">
+                <div id="card-faction-display" class="card-faction"></div>
+                <div class="card-message" id="card-message"></div>
+            </div>
+        </div>
+        
+        <!-- 全新按鈕群組設計 (無 Emoji，新增專屬分享鈕) -->
+        <div class="btn-group">
+            <button class="action-btn btn-restart" onclick="resetGame()">重新挑戰</button>
+            <a href="https://www.staracademy.com.tw/2027-winter-camp" target="_blank" class="action-btn btn-camp">前往S總部</a>
+            <button class="action-btn btn-board" onclick="showLeaderboard()">英雄榜</button>
+            
+            <button class="action-btn btn-copy" onclick="copyUrl()">點擊複製網址，叫朋友來挑戰吧！</button>
+        </div>
+        
+    </div>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyS_JY-Eh6JlSm1ZXh2DKbpDU6k0fgGzvVdhmpQYLXHUbHm-nju5w2uuLnh4glYMK0A2g/exec";
+
+    let score = 0, mistakes = 0, timeRemaining = 30.0;
+    let gameTimer = null, spawnerTimer = null;
+    let chosenColor = '';
+    let chosenCharUrl = '';
+    let scoreAt15s = 0, fastBossKill = false;
+    const totalTargets = 48; 
+    let targetsSpawned = 0, spawnQueue = [];
+
+    function showSetup() {
+        document.getElementById('cover-screen').classList.remove('active');
+        document.getElementById('setup-screen').classList.add('active');
+    }
+
+    document.querySelectorAll('.char-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            
+            document.querySelectorAll('.char-btn').forEach(b => {
+                b.classList.remove('selected');
+                b.classList.add('silhouette');
+                b.style.setProperty('--glow-color', 'transparent');
+            });
+            
+            this.classList.remove('silhouette');
+            this.classList.add('selected');
+            this.style.setProperty('--glow-color', this.dataset.color);
+            
+            chosenColor = this.dataset.color;
+            chosenCharUrl = this.dataset.char;
+            
+            document.getElementById('select-hint').style.display = 'none';
+            const nameInput = document.getElementById('playerName');
+            nameInput.style.display = 'block';
+            nameInput.focus();
+            
+            document.getElementById('continue-btn').style.display = 'block';
+        });
+    });
+
+    function submitSetup() {
+        if(!chosenColor) { alert("請先選擇一位特務夥伴！"); return; }
+        if(!document.getElementById('playerName').value) { alert("請輸入特務代號！"); return; }
+        
+        document.getElementById('setup-screen').classList.remove('active');
+        startCountdown();
+    }
+
+    function startCountdown() {
+        const cdScreen = document.getElementById('countdown-screen');
+        cdScreen.classList.add('active');
+        const cdText = document.getElementById('countdown-text');
+        
+        let count = 3;
+        cdText.innerText = count;
+        
+        let iv = setInterval(() => {
+            count--;
+            if(count > 0) {
+                cdText.innerText = count;
+            } else if(count === 0) {
+                cdText.innerText = "GO!";
+            } else {
+                clearInterval(iv);
+                cdScreen.classList.remove('active');
+                startGameCore();
+            }
+        }, 1000);
+    }
+
+    function buildQueue() {
+        spawnQueue = [];
+        for(let i=0; i<40; i++) spawnQueue.push('slime');
+        for(let i=0; i<2; i++) spawnQueue.push('boss');
+        spawnQueue.push('cat1', 'cat2', 'cat3', 'cat4', 'cat5');
+        spawnQueue.push('bomb');
+        spawnQueue.sort(() => Math.random() - 0.5);
+    }
+
+    function startGameCore() {
+        document.getElementById('game-screen').classList.add('active');
+        buildQueue();
+        document.querySelectorAll('.spawn-point').forEach(pt => {
+            pt.innerHTML = '<div class="target"></div>';
+            const t = pt.querySelector('.target');
+            
+            t.addEventListener('mousedown', hitTarget);
+            t.addEventListener('touchstart', (e) => { 
+                e.preventDefault(); 
+                hitTarget(e); 
+            }, {passive: false});
+        });
+        gameTimer = setInterval(updateTime, 100);
+        spawnerTimer = setInterval(spawnTarget, 600); 
+    }
+
+    function updateTime() {
+        timeRemaining -= 0.1;
+        document.getElementById('time-display').innerText = Math.max(0, timeRemaining).toFixed(1);
+        if(Math.abs(timeRemaining - 15.0) < 0.1) scoreAt15s = score; 
+        if(timeRemaining <= 0) endGame();
+    }
+
+    function spawnTarget() {
+        if(targetsSpawned >= totalTargets) return;
+        const points = Array.from(document.querySelectorAll('.spawn-point .target')).filter(t => !t.classList.contains('active'));
+        if(points.length === 0) return; 
+        
+        const targetEl = points[Math.floor(Math.random() * points.length)];
+        const targetType = spawnQueue[targetsSpawned++];
+        targetEl.className = 'target active ' + targetType;
+        targetEl.dataset.type = targetType;
+        targetEl.dataset.hits = "0"; 
+        targetEl.dataset.spawnTime = Date.now();
+        
+        const mySpawnToken = Date.now().toString() + Math.random();
+        targetEl.dataset.spawnToken = mySpawnToken;
+        
+        setTimeout(() => {
+            if(targetEl.dataset.spawnToken === mySpawnToken) {
+                if(targetEl.classList.contains('active') && !targetEl.classList.contains('hit')) {
+                    targetEl.classList.remove('active');
+                }
+            }
+        }, 2300);
+    }
+
+    function triggerGameOver() {
+        clearInterval(gameTimer);
+        clearInterval(spawnerTimer);
+        
+        const flash = document.createElement('div');
+        flash.style.position = 'fixed'; flash.style.top = '0'; flash.style.left = '0';
+        flash.style.width = '100vw'; flash.style.height = '100vh';
+        flash.style.background = 'white'; flash.style.zIndex = '9999';
+        document.body.appendChild(flash);
+        
+        setTimeout(() => { 
+            flash.remove(); 
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('game-over-screen').classList.add('active');
+        }, 200);
+    }
+
+    function hitTarget(e) {
+        const targetEl = e.target;
+        if(!targetEl.classList.contains('active') || targetEl.classList.contains('hit')) return;
+        
+        const type = targetEl.dataset.type;
+        const reactTime = Date.now() - parseInt(targetEl.dataset.spawnTime);
+        const activeToken = targetEl.dataset.spawnToken; 
+        let hits = parseInt(targetEl.dataset.hits) || 0;
+        
+        if(type === 'bomb') {
+            triggerGameOver();
+            return;
+        }
+        
+        if(type === 'boss') {
+            hits++;
+            targetEl.dataset.hits = hits;
+            const splat = document.createElement('div');
+            splat.className = 'splat';
+            splat.style.background = chosenColor;
+            targetEl.parentElement.appendChild(splat);
+            setTimeout(() => splat.remove(), 600);
+
+            if(hits === 1) {
+                targetEl.classList.add('damaged');
+                setTimeout(() => targetEl.classList.remove('damaged'), 300);
+                return; 
+            }
+        }
+
+        targetEl.classList.add('hit');
+        const floatTxt = document.createElement('div');
+        floatTxt.className = 'float-text';
+        
+        if(type.startsWith('cat')) {
+            mistakes++;
+            score -= 1; 
+            document.getElementById('mistake-display').innerText = mistakes;
+            document.getElementById('score-display').innerText = score;
+            floatTxt.innerText = "Oh Sorry Friend! -1";
+            floatTxt.style.color = "#ff4c4c";
+        } else {
+            if(type === 'boss') score += 2;
+            else score += 1;
+            
+            document.getElementById('score-display').innerText = score;
+            floatTxt.innerText = type === 'boss' ? "+2" : "+1";
+            floatTxt.style.color = chosenColor;
+            
+            if(type !== 'boss') {
+                const splat = document.createElement('div');
+                splat.className = 'splat';
+                splat.style.background = chosenColor;
+                targetEl.parentElement.appendChild(splat);
+                setTimeout(() => splat.remove(), 600);
+            }
+
+            if(type === 'boss' && reactTime <= 1000) {
+                fastBossKill = true;
+                floatTxt.innerText = "CRITICAL!! +2";
+            }
+        }
+        
+        targetEl.parentElement.appendChild(floatTxt);
+        setTimeout(() => floatTxt.remove(), 1000);
+        
+        setTimeout(() => { 
+            if(targetEl.dataset.spawnToken === activeToken) {
+                targetEl.classList.remove('active'); 
+            }
+        }, 600);
+    }
+
+    function endGame() {
+        clearInterval(gameTimer);
+        clearInterval(spawnerTimer);
+        document.getElementById('game-screen').classList.remove('active');
+        document.getElementById('end-screen').classList.add('active');
+        
+        const pName = document.getElementById('playerName').value;
+        let finalFaction = "", message = "";
+        
+        if(score >= 42 && mistakes === 0) {
+            finalFaction = "S-Power 總部";
+            message = "【完美通關】近乎零失誤的頂尖特務！你是守護城市的終極傳說！";
+        } else if (fastBossKill) {
+            finalFaction = "Shinie 駭客基地";
+            message = "【極限反射】頭目出現瞬間就將其擊潰！你的動態視力超越常人！";
+        } else if (scoreAt15s >= 20 && score >= 30) {
+            finalFaction = "Kion 探索實驗室";
+            message = "【開局爆發】遊戲前半段展現了壓倒性的攻擊節奏，標準的衝鋒陷陣型英雄！";
+        } else if (mistakes === 0 && score >= 20) {
+            finalFaction = "Kiona 自然研究所";
+            message = "【和平護衛】戰鬥中堅持零誤擊，保護了所有城市貓咪，心思細膩的溫柔特務！";
+        } else {
+            finalFaction = "Brownie 幻彩工作室";
+            message = "【自由揮灑】不按牌理出牌的藝術家！你專屬的漆彈色彩為這座城市帶來了新的活力！";
+        }
+        
+        document.getElementById('card-name').innerText = pName;
+        document.getElementById('card-faction-display').innerText = finalFaction;
+        document.getElementById('card-message').innerText = message;
+        document.getElementById('card-stat-score').innerText = "分數: " + score;
+        document.getElementById('card-stat-miss').innerText = "誤擊: " + mistakes;
+        
+        document.getElementById('card-char').style.backgroundImage = `url('${chosenCharUrl}')`;
+        
+        fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ name: pName, score: score, faction: finalFaction })
+        }).catch(err => console.log('上傳成績失敗:', err));
+    }
+
+    function resetGame() {
+        clearInterval(gameTimer);
+        clearInterval(spawnerTimer);
+        
+        score = 0;
+        mistakes = 0;
+        timeRemaining = 30.0;
+        targetsSpawned = 0;
+        fastBossKill = false;
+        scoreAt15s = 0;
+        
+        document.getElementById('score-display').innerText = score;
+        document.getElementById('mistake-display').innerText = mistakes;
+        document.getElementById('time-display').innerText = timeRemaining.toFixed(1);
+        
+        document.querySelectorAll('.splat, .float-text').forEach(el => el.remove());
+        document.querySelectorAll('.spawn-point').forEach(pt => pt.innerHTML = '');
+        
+        document.querySelectorAll('.char-btn').forEach(b => {
+            b.classList.remove('selected', 'silhouette');
+            b.style.setProperty('--glow-color', 'transparent');
+        });
+        document.getElementById('select-hint').style.display = 'block';
+        document.getElementById('playerName').style.display = 'none';
+        document.getElementById('playerName').value = '';
+        document.getElementById('continue-btn').style.display = 'none';
+        chosenColor = '';
+        chosenCharUrl = '';
+        
+        document.getElementById('end-screen').classList.remove('active');
+        document.getElementById('game-over-screen').classList.remove('active');
+        document.getElementById('setup-screen').classList.remove('active');
+        document.getElementById('game-screen').classList.remove('active');
+        
+        document.getElementById('cover-screen').classList.add('active');
+    }
+
+    async function showLeaderboard() {
+        const modal = document.getElementById('leaderboard-modal');
+        const list = document.getElementById('leaderboard-list');
+        modal.style.display = 'flex';
+        list.innerHTML = '<div style="color:white; text-align:center; padding: 30px;">🛰️ 正在與總部連線抓取資料...</div>';
+        
+        try {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+            
+            list.innerHTML = '';
+            if(data.length === 0) {
+                list.innerHTML = '<div style="color:#aaa; text-align:center; padding: 30px;">目前還沒有特務上榜喔！</div>';
+                return;
+            }
+            
+            data.forEach((row, index) => {
+                let rankClass = '';
+                let rankBadge = `#${index + 1}`;
+                if(index === 0) { rankClass = 'top-1'; rankBadge = '🥇'; }
+                else if(index === 1) { rankClass = 'top-2'; rankBadge = '🥈'; }
+                else if(index === 2) { rankClass = 'top-3'; rankBadge = '🥉'; }
+                
+                const tName = row.name || '神祕特務';
+                const tFaction = row.faction || '未鑑定';
+                const tScore = row.score || 0;
+
+                list.innerHTML += `
+                    <div class="board-item ${rankClass}">
+                        <div style="display:flex; align-items:center; gap: 12px;">
+                            <span style="font-size:22px; width:30px; text-align:center; font-weight:bold; color:#777;">${rankBadge}</span>
+                            <div style="display:flex; flex-direction:column;">
+                                <span class="item-name">${tName}</span>
+                                <span class="item-faction">${tFaction}</span>
+                            </div>
+                        </div>
+                        <div class="item-score">${tScore}</div>
+                    </div>
+                `;
+            });
+        } catch(err) {
+            list.innerHTML = '<div style="color:#ff4c4c; text-align:center; padding: 30px;">⚠️ 連線失敗，請檢查網路狀態</div>';
+        }
+    }
+    
+    function closeLeaderboard() {
+        document.getElementById('leaderboard-modal').style.display = 'none';
+    }
+
+    function copyUrl() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert("網址已成功複製！快去邀請朋友一起挑戰吧！");
+        }).catch(err => {
+            console.error('複製失敗: ', err);
+        });
+    }
+</script>
+</body>
+</html>
