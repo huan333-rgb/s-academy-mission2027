@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>The Fantastic S Academy - Mission</title>
 <style>
+    /* 消除手機點擊時閃爍的灰色方塊 */
+    * {
+        -webkit-tap-highlight-color: transparent; 
+        outline: none;
+    }
+
     body, html { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: white; overflow: hidden; touch-action: manipulation; }
     #game-container { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
     .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; flex-direction: column; align-items: center; justify-content: center; z-index: 10;}
@@ -45,8 +51,8 @@
     /* 共用毛玻璃 PLAY 類型的按鈕 */
     .glass-play-btn {
         position: absolute;
-        bottom: 8%;
-        right: 8%;
+        bottom: 15%; 
+        right: 15%;  
         padding: 12px 35px;
         font-size: 22px;
         font-weight: 900;
@@ -137,16 +143,17 @@
     /* 4. 遊戲場景 */
     #hud { position: absolute; top: 0; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; background: rgba(0,0,0,0.7); z-index: 5; font-size: 18px; font-weight: bold;}
     
-    /* 倒數 5 秒脈衝特效 */
+    /* 倒數 5 秒巨型脈衝特效 */
     @keyframes timeUrgentPulse {
-        0% { transform: scale(1); text-shadow: 0 0 5px rgba(255,76,76,0.5); }
-        50% { transform: scale(1.4); text-shadow: 0 0 20px rgba(255,76,76,0.9); }
-        100% { transform: scale(1); text-shadow: 0 0 5px rgba(255,76,76,0.5); }
+        0% { transform: scale(1); text-shadow: 0 0 10px rgba(255,76,76,0.6); }
+        50% { transform: scale(1.8); text-shadow: 0 0 40px rgba(255,76,76,1); color: #ff3333 !important; }
+        100% { transform: scale(1); text-shadow: 0 0 10px rgba(255,76,76,0.6); }
     }
     .time-urgent {
         display: inline-block;
         color: #ff4c4c !important;
         animation: timeUrgentPulse 0.5s infinite;
+        transform-origin: left center;
     }
 
     #play-area { width: 100%; height: 100%; position: relative; overflow: hidden; background: #0f1016; }
@@ -154,7 +161,10 @@
     
     .spawn-point { position: absolute; width: 150px; height: 150px; z-index: 2; overflow: visible; pointer-events: none;}
     .target { width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center bottom; cursor: crosshair; transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: translateY(100%) scale(0.5); opacity: 0; pointer-events: none;}
+    
     .target.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+    /* 炸彈縮小 30% 防止遮擋與重疊 */
+    .target.bomb.active { transform: translateY(0) scale(0.7); }
     
     @keyframes damageShake { 0% { transform: translate(4px, 4px) rotate(0deg); } 25% { transform: translate(-4px, -4px) rotate(-3deg); } 50% { transform: translate(-4px, 4px) rotate(3deg); } 75% { transform: translate(4px, -4px) rotate(0deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
     .target.damaged { animation: damageShake 0.2s; filter: brightness(1.5) saturate(1.5); }
@@ -334,12 +344,12 @@
         <div class="continue-hint" id="continue-btn" style="display:none;" onclick="submitSetup()">Click to Continue</div>
     </div>
 
-    <!-- 第三步：新增的故事背景頁面 -->
+    <!-- 第三步：故事背景頁面 -->
     <div id="story-screen" class="screen">
         <button class="glass-play-btn" onclick="showRules()">NEXT ▶</button>
     </div>
 
-    <!-- 第四步：新增的規則頁面 -->
+    <!-- 第四步：規則頁面 -->
     <div id="rules-screen" class="screen">
         <button class="glass-play-btn" onclick="startCountdown()">START!</button>
     </div>
@@ -417,9 +427,10 @@
     let chosenColor = '';
     let chosenCharUrl = '';
     let scoreAt15s = 0, fastBossKill = false;
+    let currentPhase = 1;
     
-    // 總怪數增加到 62：50(小) + 4(大) + 5(貓) + 3(地雷)
-    const totalTargets = 62; 
+    // 總怪數增加到 76：60(小) + 5(大) + 7(貓) + 4(地雷)
+    const totalTargets = 76; 
     let targetsSpawned = 0, spawnQueue = [];
 
     function showSetup() {
@@ -452,7 +463,6 @@
         });
     });
 
-    // 從選角頁面前往「故事頁面」
     function submitSetup() {
         if(!chosenColor) { alert("請先選擇一位特務夥伴！"); return; }
         if(!document.getElementById('playerName').value) { alert("請輸入特務代號！"); return; }
@@ -461,13 +471,11 @@
         document.getElementById('story-screen').classList.add('active');
     }
     
-    // 從故事頁面前往「規則頁面」
     function showRules() {
         document.getElementById('story-screen').classList.remove('active');
         document.getElementById('rules-screen').classList.add('active');
     }
 
-    // 從規則頁面開始「倒數」
     function startCountdown() {
         document.getElementById('rules-screen').classList.remove('active');
         const cdScreen = document.getElementById('countdown-screen');
@@ -493,15 +501,15 @@
 
     function buildQueue() {
         spawnQueue = [];
-        // 增加史萊姆到 50，大王到 4，炸彈到 3
-        for(let i=0; i<50; i++) spawnQueue.push('slime');
-        for(let i=0; i<4; i++) spawnQueue.push('boss');
-        spawnQueue.push('cat1', 'cat2', 'cat3', 'cat4', 'cat5');
-        for(let i=0; i<3; i++) spawnQueue.push('bomb');
+        for(let i=0; i<60; i++) spawnQueue.push('slime');
+        for(let i=0; i<5; i++) spawnQueue.push('boss');
+        spawnQueue.push('cat1', 'cat2', 'cat3', 'cat4', 'cat5', 'cat1', 'cat2');
+        for(let i=0; i<4; i++) spawnQueue.push('bomb');
         spawnQueue.sort(() => Math.random() - 0.5);
     }
 
     function startGameCore() {
+        currentPhase = 1;
         document.getElementById('game-screen').classList.add('active');
         buildQueue();
         document.querySelectorAll('.spawn-point').forEach(pt => {
@@ -514,7 +522,9 @@
                 hitTarget(e); 
             }, {passive: false});
         });
+        
         gameTimer = setInterval(updateTime, 100);
+        // 第一階段：出怪慢一點 (0.45秒/隻)
         spawnerTimer = setInterval(spawnTarget, 450); 
     }
 
@@ -524,7 +534,15 @@
         let timeEl = document.getElementById('time-display');
         timeEl.innerText = displayTime.toFixed(1);
         
-        // 倒數5秒脈衝特效
+        // 進入第二階段：最後 10 秒狂暴模式
+        if (displayTime <= 10.0 && displayTime > 0 && currentPhase === 1) {
+            currentPhase = 2;
+            clearInterval(spawnerTimer);
+            // 狂暴模式：出怪飆速 (0.3秒/隻)
+            spawnerTimer = setInterval(spawnTarget, 300);
+        }
+        
+        // 倒數 5 秒啟動脈衝特效
         if(displayTime <= 5.0 && displayTime > 0) {
             timeEl.classList.add('time-urgent');
         } else {
@@ -550,13 +568,16 @@
         const mySpawnToken = Date.now().toString() + Math.random();
         targetEl.dataset.spawnToken = mySpawnToken;
         
+        // 第一階段怪物停留 1.5 秒，狂暴階段停留 0.95 秒 (加速清理畫面)
+        const stayTime = currentPhase === 1 ? 1500 : 950;
+        
         setTimeout(() => {
             if(targetEl.dataset.spawnToken === mySpawnToken) {
                 if(targetEl.classList.contains('active') && !targetEl.classList.contains('hit')) {
                     targetEl.classList.remove('active');
                 }
             }
-        }, 2300);
+        }, stayTime);
     }
 
     function triggerGameOver() {
@@ -653,18 +674,16 @@
         clearInterval(gameTimer);
         clearInterval(spawnerTimer);
         
-        // 確保結算時移除紅色特效，避免重新挑戰時卡在紅色
         document.getElementById('time-display').classList.remove('time-urgent');
-        
         document.getElementById('global-logo').style.display = 'none';
+        
         document.getElementById('game-screen').classList.remove('active');
         document.getElementById('end-screen').classList.add('active');
         
         const pName = document.getElementById('playerName').value;
         let finalFaction = "", message = "";
         
-        // 總怪數增加，完美通關門檻上調至 50 分
-        if(score >= 50 && mistakes === 0) {
+        if(score >= 60 && mistakes === 0) {
             finalFaction = "S-Power 總部指揮官";
             message = "【完美通關】近乎零失誤的頂尖特務！你是守護城市的終極傳說！";
         } else if (fastBossKill) {
@@ -709,6 +728,7 @@
         targetsSpawned = 0;
         fastBossKill = false;
         scoreAt15s = 0;
+        currentPhase = 1;
         
         document.getElementById('score-display').innerText = score;
         document.getElementById('mistake-display').innerText = mistakes;
@@ -754,7 +774,6 @@
                 return;
             }
             
-            // 排行榜僅顯示前 10 名
             const top10Data = data.slice(0, 10);
             
             top10Data.forEach((row, index) => {
