@@ -324,18 +324,19 @@
     <img src="https://lh3.googleusercontent.com/d/1JvUAx5ZcQHUAljDG-QvOjKnJabYczGQj">
 </div>
 
-<!-- ================== JavaScript 跨域音效引擎 ================== -->
+<!-- ================== JavaScript 本機音效引擎 ================== -->
 <script>
+    // 直接讀取跟 index.html 放在同一個 GitHub 資料夾下的音檔
     const audioContext = {
-        final: new Audio("https://drive.google.com/uc?export=download&id=1dfl7xQll6YtIKaaawNh_H2JGo4e8XcUe"),
-        gg: new Audio("https://drive.google.com/uc?export=download&id=1S6qqXqE6-7yE9THZ8gsX5_wCUwJ61iOz"),
-        ouch: new Audio("https://drive.google.com/uc?export=download&id=1nrTPbNwGqVNVHn4nVslgcKIn0dPIiymC"),
-        hit: new Audio("https://drive.google.com/uc?export=download&id=1yUjkmWvPjh5jWtFCvLUgBqSb5xWwEQ4o"),
-        next: new Audio("https://drive.google.com/uc?export=download&id=1G4KEtZNqdLFYUA93-gfpW4EpSjyYnpbR")
+        final: new Audio("./final.mp3"),
+        gg: new Audio("./gg.mp3"),
+        ouch: new Audio("./ouch.mp3"),
+        hit: new Audio("./hit.mp3"),
+        next: new Audio("./next.mp3")
     };
 
+    // 預先加載音頻 (移除了會被擋的 crossOrigin)
     Object.values(audioContext).forEach(audio => {
-        audio.crossOrigin = "anonymous";
         audio.preload = "auto";
     });
 
