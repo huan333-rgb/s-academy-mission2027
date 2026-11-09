@@ -42,6 +42,7 @@
     .flash-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; animation: flashAnim 3s infinite alternate; pointer-events: none; z-index: 5;}
     @keyframes flashAnim { 0% { opacity: 0; } 100% { opacity: 0.15; } }
 
+    /* 共用毛玻璃 PLAY 類型的按鈕 */
     .glass-play-btn {
         position: absolute;
         bottom: 8%;
@@ -103,6 +104,31 @@
     .continue-hint { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); color: white; font-size: 24px; font-weight: bold; letter-spacing: 1px; cursor: pointer; padding: 12px 30px; border-radius: 40px; background: rgba(0,0,0,0.7); border: 2px solid rgba(255,255,255,0.4); backdrop-filter: blur(5px); z-index: 25; animation: floatHint 2s ease-in-out infinite; text-shadow: 0 2px 5px black; white-space: nowrap; box-shadow: 0 10px 20px rgba(0,0,0,0.5);}
     @keyframes floatHint { 0%, 100% { transform: translate(-50%, 0); box-shadow: 0 10px 20px rgba(0,0,0,0.5); } 50% { transform: translate(-50%, -15px); box-shadow: 0 20px 25px rgba(0,0,0,0.3); } }
 
+    /* 故事與規則介面 */
+    #story-screen, #rules-screen { background-color: #0b0c10; overflow: hidden; }
+    
+    #story-screen::before {
+        content: ''; position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
+        background-image: url('https://lh3.googleusercontent.com/d/1hdJ31yVYiZSeCTNWhkFSn3sJujnOPG1d'); 
+        background-size: cover; background-position: center; filter: blur(25px); opacity: 0.5; z-index: 1; pointer-events: none;
+    }
+    #story-screen::after {
+        content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url('https://lh3.googleusercontent.com/d/1hdJ31yVYiZSeCTNWhkFSn3sJujnOPG1d'); 
+        background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2; pointer-events: none;
+    }
+
+    #rules-screen::before {
+        content: ''; position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
+        background-image: url('https://lh3.googleusercontent.com/d/1ThPeVMO8oougK-FjCW0otn5hK-YuRAop'); 
+        background-size: cover; background-position: center; filter: blur(25px); opacity: 0.5; z-index: 1; pointer-events: none;
+    }
+    #rules-screen::after {
+        content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url('https://lh3.googleusercontent.com/d/1ThPeVMO8oougK-FjCW0otn5hK-YuRAop'); 
+        background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2; pointer-events: none;
+    }
+
     /* 3. 倒數介面 */
     #countdown-screen { background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column; justify-content: center; align-items: center; }
     #countdown-text { font-size: 150px; font-weight: 900; color: #f2a900; text-shadow: 0 0 30px rgba(242,169,0,0.8); animation: popIn 1s infinite; }
@@ -110,6 +136,19 @@
     
     /* 4. 遊戲場景 */
     #hud { position: absolute; top: 0; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; background: rgba(0,0,0,0.7); z-index: 5; font-size: 18px; font-weight: bold;}
+    
+    /* 倒數 5 秒脈衝特效 */
+    @keyframes timeUrgentPulse {
+        0% { transform: scale(1); text-shadow: 0 0 5px rgba(255,76,76,0.5); }
+        50% { transform: scale(1.4); text-shadow: 0 0 20px rgba(255,76,76,0.9); }
+        100% { transform: scale(1); text-shadow: 0 0 5px rgba(255,76,76,0.5); }
+    }
+    .time-urgent {
+        display: inline-block;
+        color: #ff4c4c !important;
+        animation: timeUrgentPulse 0.5s infinite;
+    }
+
     #play-area { width: 100%; height: 100%; position: relative; overflow: hidden; background: #0f1016; }
     .city-bg { position: absolute; bottom: 0; width: 100%; height: 100%; background-image: url('https://lh3.googleusercontent.com/d/13M3Lg2Z-GcAWanuIUfzABK8Ll7WDLqWV'); background-size: cover; background-position: center bottom; z-index: 1; pointer-events: none; }
     
@@ -149,7 +188,6 @@
     /* =========================================
        6. 結算卡牌介面
        ========================================= */
-    /* 增加了 padding-bottom 確保底部 LOGO 有充足空間 */
     #end-screen { background: linear-gradient(to bottom, #0f1016, #16213e); overflow-y: auto; padding: 25px 0 100px 0; justify-content: flex-start;}
     
     .share-card { 
@@ -242,7 +280,7 @@
 </style>
 </head>
 <body>
-<!-- 預載圖檔 (包含全新的LOGO) -->
+<!-- 預載圖檔 -->
 <div style="display:none;">
     <img src="https://lh3.googleusercontent.com/d/1UZoE9T9v-UXUEBUMPYPp_Qkd_mIUoM2H">
     <img src="https://lh3.googleusercontent.com/d/1XBJ0q8hogS6rvhQaCdvC69zGLvJh5A-y">
@@ -253,6 +291,8 @@
     <img src="https://lh3.googleusercontent.com/d/1vBwCbKiWIg2qpKp_c88wlCTG5pA04r6-">
     <img src="https://lh3.googleusercontent.com/d/1yvx_BbmQFOVz77iqKGGmVQYTY86EjxcQ">
     <img src="https://lh3.googleusercontent.com/d/1ubF5fJs6JEBhojrfEH0nNKwSwCOtSgpu">
+    <img src="https://lh3.googleusercontent.com/d/1hdJ31yVYiZSeCTNWhkFSn3sJujnOPG1d">
+    <img src="https://lh3.googleusercontent.com/d/1ThPeVMO8oougK-FjCW0otn5hK-YuRAop">
 </div>
 
 <!-- 排行榜浮動視窗 -->
@@ -294,15 +334,25 @@
         <div class="continue-hint" id="continue-btn" style="display:none;" onclick="submitSetup()">Click to Continue</div>
     </div>
 
-    <!-- 第三步：倒數 -->
+    <!-- 第三步：新增的故事背景頁面 -->
+    <div id="story-screen" class="screen">
+        <button class="glass-play-btn" onclick="showRules()">NEXT ▶</button>
+    </div>
+
+    <!-- 第四步：新增的規則頁面 -->
+    <div id="rules-screen" class="screen">
+        <button class="glass-play-btn" onclick="startCountdown()">STAR!</button>
+    </div>
+
+    <!-- 第五步：倒數 -->
     <div id="countdown-screen" class="screen">
         <div id="countdown-text">3</div>
     </div>
 
-    <!-- 第四步：射擊戰場 -->
+    <!-- 第六步：射擊戰場 -->
     <div id="game-screen" class="screen">
         <div id="hud">
-            <div>TIME: <span id="time-display" style="color:#00ffcc;">30.0</span></div>
+            <div>TIME: <span id="time-display" style="color:#00ffcc; transition: 0.2s;">30.0</span></div>
             <div>SCORE: <span id="score-display">0</span></div>
             <div>MISS: <span id="mistake-display" style="color: #ff4c4c;">0</span></div>
         </div>
@@ -324,7 +374,7 @@
         <div class="continue-hint" onclick="resetGame()" style="bottom: 12%;">Click to Continue</div>
     </div>
 
-    <!-- 第五步：結算卡牌直出 -->
+    <!-- 第七步：結算卡牌直出 -->
     <div id="end-screen" class="screen">
         
         <div class="share-card" id="share-card">
@@ -367,7 +417,9 @@
     let chosenColor = '';
     let chosenCharUrl = '';
     let scoreAt15s = 0, fastBossKill = false;
-    const totalTargets = 55; 
+    
+    // 總怪數增加到 62：50(小) + 4(大) + 5(貓) + 3(地雷)
+    const totalTargets = 62; 
     let targetsSpawned = 0, spawnQueue = [];
 
     function showSetup() {
@@ -400,15 +452,24 @@
         });
     });
 
+    // 從選角頁面前往「故事頁面」
     function submitSetup() {
         if(!chosenColor) { alert("請先選擇一位特務夥伴！"); return; }
         if(!document.getElementById('playerName').value) { alert("請輸入特務代號！"); return; }
         
         document.getElementById('setup-screen').classList.remove('active');
-        startCountdown();
+        document.getElementById('story-screen').classList.add('active');
+    }
+    
+    // 從故事頁面前往「規則頁面」
+    function showRules() {
+        document.getElementById('story-screen').classList.remove('active');
+        document.getElementById('rules-screen').classList.add('active');
     }
 
+    // 從規則頁面開始「倒數」
     function startCountdown() {
+        document.getElementById('rules-screen').classList.remove('active');
         const cdScreen = document.getElementById('countdown-screen');
         cdScreen.classList.add('active');
         const cdText = document.getElementById('countdown-text');
@@ -432,10 +493,11 @@
 
     function buildQueue() {
         spawnQueue = [];
-        for(let i=0; i<45; i++) spawnQueue.push('slime');
-        for(let i=0; i<3; i++) spawnQueue.push('boss');
+        // 增加史萊姆到 50，大王到 4，炸彈到 3
+        for(let i=0; i<50; i++) spawnQueue.push('slime');
+        for(let i=0; i<4; i++) spawnQueue.push('boss');
         spawnQueue.push('cat1', 'cat2', 'cat3', 'cat4', 'cat5');
-        for(let i=0; i<2; i++) spawnQueue.push('bomb');
+        for(let i=0; i<3; i++) spawnQueue.push('bomb');
         spawnQueue.sort(() => Math.random() - 0.5);
     }
 
@@ -458,7 +520,17 @@
 
     function updateTime() {
         timeRemaining -= 0.1;
-        document.getElementById('time-display').innerText = Math.max(0, timeRemaining).toFixed(1);
+        let displayTime = Math.max(0, timeRemaining);
+        let timeEl = document.getElementById('time-display');
+        timeEl.innerText = displayTime.toFixed(1);
+        
+        // 倒數5秒脈衝特效
+        if(displayTime <= 5.0 && displayTime > 0) {
+            timeEl.classList.add('time-urgent');
+        } else {
+            timeEl.classList.remove('time-urgent');
+        }
+
         if(Math.abs(timeRemaining - 15.0) < 0.1) scoreAt15s = score; 
         if(timeRemaining <= 0) endGame();
     }
@@ -581,16 +653,18 @@
         clearInterval(gameTimer);
         clearInterval(spawnerTimer);
         
-        // 隱藏全局右上角LOGO，讓底部專屬LOGO顯示
-        document.getElementById('global-logo').style.display = 'none';
+        // 確保結算時移除紅色特效，避免重新挑戰時卡在紅色
+        document.getElementById('time-display').classList.remove('time-urgent');
         
+        document.getElementById('global-logo').style.display = 'none';
         document.getElementById('game-screen').classList.remove('active');
         document.getElementById('end-screen').classList.add('active');
         
         const pName = document.getElementById('playerName').value;
         let finalFaction = "", message = "";
         
-        if(score >= 48 && mistakes === 0) {
+        // 總怪數增加，完美通關門檻上調至 50 分
+        if(score >= 50 && mistakes === 0) {
             finalFaction = "S-Power 總部指揮官";
             message = "【完美通關】近乎零失誤的頂尖特務！你是守護城市的終極傳說！";
         } else if (fastBossKill) {
@@ -626,7 +700,7 @@
         clearInterval(gameTimer);
         clearInterval(spawnerTimer);
         
-        // 恢復全局右上角LOGO
+        document.getElementById('time-display').classList.remove('time-urgent');
         document.getElementById('global-logo').style.display = 'block';
         
         score = 0;
@@ -654,6 +728,8 @@
         chosenColor = '';
         chosenCharUrl = '';
         
+        document.getElementById('story-screen').classList.remove('active');
+        document.getElementById('rules-screen').classList.remove('active');
         document.getElementById('end-screen').classList.remove('active');
         document.getElementById('game-over-screen').classList.remove('active');
         document.getElementById('setup-screen').classList.remove('active');
@@ -678,7 +754,10 @@
                 return;
             }
             
-            data.forEach((row, index) => {
+            // 排行榜僅顯示前 10 名
+            const top10Data = data.slice(0, 10);
+            
+            top10Data.forEach((row, index) => {
                 let rankClass = '';
                 let rankBadge = `#${index + 1}`;
                 if(index === 0) { rankClass = 'top-1'; rankBadge = '🥇'; }
