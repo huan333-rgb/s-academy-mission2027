@@ -48,24 +48,22 @@
     .flash-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; animation: flashAnim 3s infinite alternate; pointer-events: none; z-index: 5;}
     @keyframes flashAnim { 0% { opacity: 0; } 100% { opacity: 0.15; } }
 
-    /* 共用毛玻璃 PLAY 類型的按鈕 */
+    /* 共用毛玻璃 PLAY 類型的按鈕基礎樣式 (高透明度) */
     .glass-play-btn {
         position: absolute;
-        bottom: 15%; 
-        right: 15%;  
         padding: 12px 35px;
         font-size: 22px;
         font-weight: 900;
         color: #fff;
         letter-spacing: 2px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05); /* 高透明度 */
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.3);
         border-top: 1px solid rgba(255, 255, 255, 0.5);
         border-left: 1px solid rgba(255, 255, 255, 0.5);
         border-radius: 40px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255,255,255,0.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(255,255,255,0.05);
         cursor: pointer;
         z-index: 20;
         transition: 0.3s;
@@ -73,15 +71,26 @@
         animation: playPulse 2.5s infinite alternate;
     }
     .glass-play-btn:hover {
-        transform: scale(1.05);
-        background: rgba(255, 255, 255, 0.25);
-        box-shadow: 0 10px 30px rgba(0, 255, 204, 0.4), inset 0 0 15px rgba(255,255,255,0.3);
-        border-color: rgba(0, 255, 204, 0.6);
+        transform: scale(1.05); 
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 10px 30px rgba(0, 255, 204, 0.3), inset 0 0 15px rgba(255,255,255,0.2);
+        border-color: rgba(0, 255, 204, 0.5);
         color: #00ffcc;
     }
     @keyframes playPulse {
-        0% { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); }
-        100% { box-shadow: 0 8px 25px rgba(0, 255, 204, 0.3); }
+        0% { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); }
+        100% { box-shadow: 0 8px 25px rgba(0, 255, 204, 0.2); }
+    }
+
+    /* 👇 針對不同頁面進行精準定位 👇 */
+    #cover-screen .glass-play-btn {
+        bottom: 12%; 
+        right: 8%;
+    }
+    #story-screen .glass-play-btn, #rules-screen .glass-play-btn {
+        /* 大幅往上提，放在文字與火箭上方的完美空白處 */
+        bottom: 28%; 
+        right: 8%;
     }
 
     /* 2. 二合一：選角與名字輸入介面 */
@@ -143,7 +152,6 @@
     /* 4. 遊戲場景 */
     #hud { position: absolute; top: 0; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; background: rgba(0,0,0,0.7); z-index: 5; font-size: 18px; font-weight: bold;}
     
-    /* 倒數 5 秒巨型脈衝特效 */
     @keyframes timeUrgentPulse {
         0% { transform: scale(1); text-shadow: 0 0 10px rgba(255,76,76,0.6); }
         50% { transform: scale(1.8); text-shadow: 0 0 40px rgba(255,76,76,1); color: #ff3333 !important; }
@@ -163,7 +171,6 @@
     .target { width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center bottom; cursor: crosshair; transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: translateY(100%) scale(0.5); opacity: 0; pointer-events: none;}
     
     .target.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
-    /* 炸彈縮小 30% 防止遮擋與重疊 */
     .target.bomb.active { transform: translateY(0) scale(0.7); }
     
     @keyframes damageShake { 0% { transform: translate(4px, 4px) rotate(0deg); } 25% { transform: translate(-4px, -4px) rotate(-3deg); } 50% { transform: translate(-4px, 4px) rotate(3deg); } 75% { transform: translate(4px, -4px) rotate(0deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
@@ -429,7 +436,7 @@
     let scoreAt15s = 0, fastBossKill = false;
     let currentPhase = 1;
     
-    // 總怪數增加到 76：60(小) + 5(大) + 7(貓) + 4(地雷)
+    // 總怪數 76：60(小) + 5(大) + 7(貓) + 4(地雷)
     const totalTargets = 76; 
     let targetsSpawned = 0, spawnQueue = [];
 
@@ -524,7 +531,6 @@
         });
         
         gameTimer = setInterval(updateTime, 100);
-        // 第一階段：出怪慢一點 (0.45秒/隻)
         spawnerTimer = setInterval(spawnTarget, 450); 
     }
 
@@ -534,15 +540,12 @@
         let timeEl = document.getElementById('time-display');
         timeEl.innerText = displayTime.toFixed(1);
         
-        // 進入第二階段：最後 10 秒狂暴模式
         if (displayTime <= 10.0 && displayTime > 0 && currentPhase === 1) {
             currentPhase = 2;
             clearInterval(spawnerTimer);
-            // 狂暴模式：出怪飆速 (0.3秒/隻)
             spawnerTimer = setInterval(spawnTarget, 300);
         }
         
-        // 倒數 5 秒啟動脈衝特效
         if(displayTime <= 5.0 && displayTime > 0) {
             timeEl.classList.add('time-urgent');
         } else {
@@ -568,7 +571,6 @@
         const mySpawnToken = Date.now().toString() + Math.random();
         targetEl.dataset.spawnToken = mySpawnToken;
         
-        // 第一階段怪物停留 1.5 秒，狂暴階段停留 0.95 秒 (加速清理畫面)
         const stayTime = currentPhase === 1 ? 1500 : 950;
         
         setTimeout(() => {
