@@ -48,7 +48,7 @@
     .flash-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; animation: flashAnim 3s infinite alternate; pointer-events: none; z-index: 5;}
     @keyframes flashAnim { 0% { opacity: 0; } 100% { opacity: 0.15; } }
 
-    /* 共用毛玻璃 PLAY 類型的按鈕基礎樣式 (高透明度) */
+    /* 共用毛玻璃 PLAY 類型的按鈕基礎樣式 (極致高透明度) */
     .glass-play-btn {
         position: absolute;
         padding: 12px 35px;
@@ -56,7 +56,7 @@
         font-weight: 900;
         color: #fff;
         letter-spacing: 2px;
-        background: rgba(255, 255, 255, 0.05); /* 高透明度 */
+        background: rgba(255, 255, 255, 0.05); /* 極度透明 */
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.3);
@@ -82,15 +82,27 @@
         100% { box-shadow: 0 8px 25px rgba(0, 255, 204, 0.2); }
     }
 
-    /* 👇 針對不同頁面進行精準定位 👇 */
+    /* 👇 針對不同頁面進行按鈕精準定位 👇 */
     #cover-screen .glass-play-btn {
         bottom: 12%; 
         right: 8%;
     }
-    #story-screen .glass-play-btn, #rules-screen .glass-play-btn {
-        /* 大幅往上提，放在文字與火箭上方的完美空白處 */
-        bottom: 28%; 
-        right: 8%;
+    
+    #story-screen .glass-play-btn {
+        /* 故事頁面專屬：精準水平置中 */
+        bottom: 24%; 
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    #story-screen .glass-play-btn:hover {
+        /* 懸停時保持置中並放大 */
+        transform: translateX(-50%) scale(1.05);
+    }
+    
+    #rules-screen .glass-play-btn {
+        /* 規則頁面專屬：精準定位在炸彈圖示右邊的留白處 */
+        bottom: 12%; 
+        right: 12%;
     }
 
     /* 2. 二合一：選角與名字輸入介面 */
@@ -124,23 +136,23 @@
     
     #story-screen::before {
         content: ''; position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
-        background-image: url('https://lh3.googleusercontent.com/d/1hdJ31yVYiZSeCTNWhkFSn3sJujnOPG1d'); 
+        background-image: url('https://lh3.googleusercontent.com/d/1OdvS8yH-jC7fG365xYlrTp21tDjvOAg9'); 
         background-size: cover; background-position: center; filter: blur(25px); opacity: 0.5; z-index: 1; pointer-events: none;
     }
     #story-screen::after {
         content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background-image: url('https://lh3.googleusercontent.com/d/1hdJ31yVYiZSeCTNWhkFSn3sJujnOPG1d'); 
+        background-image: url('https://lh3.googleusercontent.com/d/1OdvS8yH-jC7fG365xYlrTp21tDjvOAg9'); 
         background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2; pointer-events: none;
     }
 
     #rules-screen::before {
         content: ''; position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
-        background-image: url('https://lh3.googleusercontent.com/d/1ThPeVMO8oougK-FjCW0otn5hK-YuRAop'); 
+        background-image: url('https://lh3.googleusercontent.com/d/1JvUAx5ZcQHUAljDG-QvOjKnJabYczGQj'); 
         background-size: cover; background-position: center; filter: blur(25px); opacity: 0.5; z-index: 1; pointer-events: none;
     }
     #rules-screen::after {
         content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background-image: url('https://lh3.googleusercontent.com/d/1ThPeVMO8oougK-FjCW0otn5hK-YuRAop'); 
+        background-image: url('https://lh3.googleusercontent.com/d/1JvUAx5ZcQHUAljDG-QvOjKnJabYczGQj'); 
         background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 2; pointer-events: none;
     }
 
@@ -308,8 +320,8 @@
     <img src="https://lh3.googleusercontent.com/d/1vBwCbKiWIg2qpKp_c88wlCTG5pA04r6-">
     <img src="https://lh3.googleusercontent.com/d/1yvx_BbmQFOVz77iqKGGmVQYTY86EjxcQ">
     <img src="https://lh3.googleusercontent.com/d/1ubF5fJs6JEBhojrfEH0nNKwSwCOtSgpu">
-    <img src="https://lh3.googleusercontent.com/d/1hdJ31yVYiZSeCTNWhkFSn3sJujnOPG1d">
-    <img src="https://lh3.googleusercontent.com/d/1ThPeVMO8oougK-FjCW0otn5hK-YuRAop">
+    <img src="https://lh3.googleusercontent.com/d/1OdvS8yH-jC7fG365xYlrTp21tDjvOAg9">
+    <img src="https://lh3.googleusercontent.com/d/1JvUAx5ZcQHUAljDG-QvOjKnJabYczGQj">
 </div>
 
 <!-- 排行榜浮動視窗 -->
@@ -353,12 +365,12 @@
 
     <!-- 第三步：故事背景頁面 -->
     <div id="story-screen" class="screen">
-        <button class="glass-play-btn" onclick="showRules()">NEXT ▶</button>
+        <button class="glass-play-btn" onclick="showRules()">NEXT ➡</button>
     </div>
 
     <!-- 第四步：規則頁面 -->
     <div id="rules-screen" class="screen">
-        <button class="glass-play-btn" onclick="startCountdown()">START!</button>
+        <button class="glass-play-btn" onclick="startCountdown()">START!!</button>
     </div>
 
     <!-- 第五步：倒數 -->
@@ -436,7 +448,6 @@
     let scoreAt15s = 0, fastBossKill = false;
     let currentPhase = 1;
     
-    // 總怪數 76：60(小) + 5(大) + 7(貓) + 4(地雷)
     const totalTargets = 76; 
     let targetsSpawned = 0, spawnQueue = [];
 
