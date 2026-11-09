@@ -326,150 +326,6 @@
 
 <!-- ================== JavaScript 本機音效引擎 ================== -->
 <script>
-    // 直接讀取跟 index.html 放在同一個 GitHub 資料夾下的音檔
-    const audioContext = {
-        final: new Audio("./final.mp3"),
-        gg: new Audio("./gg.mp3"),
-        ouch: new Audio("./ouch.mp3"),
-        hit: new Audio("./hit.mp3"),
-        next: new Audio("./next.mp3")
-    };
-
-    // 預先加載音頻 (移除了會被擋的 crossOrigin)
-    Object.values(audioContext).forEach(audio => {
-        audio.preload = "auto";
-    });
-
-    function playSound(type) {
-        try {
-            if (type === 'hit' || type === 'ouch') {
-                const clone = audioContext[type].cloneNode();
-                clone.play().catch(e => console.log('Audio overlap blocked by browser', e));
-            } else {
-                audioContext[type].currentTime = 0;
-                audioContext[type].play().catch(e => console.log('Audio blocked by browser policy', e));
-            }
-        } catch (error) {
-            console.log("Audio play error", error);
-        }
-    }
-</script>
-
-<!-- 排行榜浮動視窗 -->
-<div id="leaderboard-modal">
-    <div class="board-container">
-        <div class="board-title">🏆 S學院 特務排行榜</div>
-        <div class="board-list" id="leaderboard-list">
-            <div style="color:white; text-align:center; padding: 30px;">訊號連線中...</div>
-        </div>
-        <button class="close-board-btn" onclick="closeLeaderboard()">關閉面板</button>
-    </div>
-</div>
-
-<div id="game-container">
-    
-    <!-- 全局右上角 LOGO -->
-    <img src="https://lh3.googleusercontent.com/d/1ubF5fJs6JEBhojrfEH0nNKwSwCOtSgpu" id="global-logo" class="global-logo" alt="logo">
-
-    <!-- 第一步：封面 -->
-    <div id="cover-screen" class="screen active">
-        <div class="flash-overlay"></div>
-        <button class="glass-play-btn" onclick="showSetup()">PLAY ▶</button>
-    </div>
-    
-    <!-- 第二步：二合一選角與名字介面 -->
-    <div id="setup-screen" class="screen">
-        
-        <div class="char-btn" id="char-1" data-color="#ffff00" data-char="https://lh3.googleusercontent.com/d/1sWEvCS7vU9Eo52PTPmCX-BJLL3dIx6V9" style="background-image: url('https://lh3.googleusercontent.com/d/1sWEvCS7vU9Eo52PTPmCX-BJLL3dIx6V9'); top: 8%; left: 0%; width: 42%; height: 40%;"></div>
-        <div class="char-btn" id="char-2" data-color="#ff4c4c" data-char="https://lh3.googleusercontent.com/d/1FWbVVJk73_KAWAFMEkde_x5eOwHiDnyy" style="background-image: url('https://lh3.googleusercontent.com/d/1FWbVVJk73_KAWAFMEkde_x5eOwHiDnyy'); top: 0%; left: 28%; width: 45%; height: 40%;"></div>
-        <div class="char-btn" id="char-3" data-color="#ff007f" data-char="https://lh3.googleusercontent.com/d/1XJYk0NNkSGjKZB7WBhuH3awZkp8XFIbu" style="background-image: url('https://lh3.googleusercontent.com/d/1XJYk0NNkSGjKZB7WBhuH3awZkp8XFIbu'); top: 8%; left: 58%; width: 42%; height: 40%;"></div>
-        <div class="char-btn" id="char-4" data-color="#39ff14" data-char="https://lh3.googleusercontent.com/d/1ATpnd1_I6ssa9e2MXuIvuLzweoMCXwG0" style="background-image: url('https://lh3.googleusercontent.com/d/1ATpnd1_I6ssa9e2MXuIvuLzweoMCXwG0'); top: 52%; left: 5%; width: 45%; height: 40%;"></div>
-        <div class="char-btn" id="char-5" data-color="#00ffcc" data-char="https://lh3.googleusercontent.com/d/1O8TdHGd5j7SEAYv3h5HrvMnP6-Z7RgpB" style="background-image: url('https://lh3.googleusercontent.com/d/1O8TdHGd5j7SEAYv3h5HrvMnP6-Z7RgpB'); top: 52%; left: 50%; width: 45%; height: 40%;"></div>
-
-        <div class="capsule-box">
-            <div id="select-hint">Click on a character to select it</div>
-            <input type="text" id="playerName" placeholder="Your Name..." autocomplete="off">
-        </div>
-        
-        <div class="continue-hint" id="continue-btn" style="display:none;" onclick="submitSetup()">Click to Continue</div>
-    </div>
-
-    <!-- 第三步：故事背景頁面 -->
-    <div id="story-screen" class="screen">
-        <button class="glass-play-btn" onclick="showRules()">NEXT ➡</button>
-    </div>
-
-    <!-- 第四步：規則頁面 -->
-    <div id="rules-screen" class="screen">
-        <button class="glass-play-btn" onclick="startCountdown()">START!!</button>
-    </div>
-
-    <!-- 第五步：倒數 -->
-    <div id="countdown-screen" class="screen">
-        <div id="countdown-text">3</div>
-    </div>
-
-    <!-- 第六步：射擊戰場 -->
-    <div id="game-screen" class="screen">
-        <div id="hud">
-            <div>TIME: <span id="time-display" style="color:#00ffcc; transition: 0.2s;">30.0</span></div>
-            <div>SCORE: <span id="score-display">0</span></div>
-            <div>MISS: <span id="mistake-display" style="color: #ff4c4c;">0</span></div>
-        </div>
-        <div id="play-area">
-            <div class="city-bg"></div>
-            <div class="spawn-point" style="top: 25%; left: 10%;"></div>
-            <div class="spawn-point" style="top: 45%; left: 30%;"></div>
-            <div class="spawn-point" style="top: 30%; left: 55%;"></div>
-            <div class="spawn-point" style="top: 65%; left: 15%;"></div>
-            <div class="spawn-point" style="top: 55%; left: 65%;"></div>
-            <div class="spawn-point" style="top: 70%; left: 40%;"></div>
-            <div class="spawn-point" style="top: 20%; left: 70%;"></div>
-            <div class="spawn-point" style="top: 60%; left: 75%;"></div>
-        </div>
-    </div>
-    
-    <!-- 炸彈死局 -->
-    <div id="game-over-screen" class="screen">
-        <div class="continue-hint" onclick="resetGame()" style="bottom: 12%;">Click to Continue</div>
-    </div>
-
-    <!-- 第七步：結算卡牌直出 -->
-    <div id="end-screen" class="screen">
-        
-        <div class="share-card" id="share-card">
-            <div class="card-header">
-                <div class="card-stats glass-badge">
-                    <span id="card-stat-score">分數: 0</span>
-                    <span id="card-stat-miss">誤擊: 0</span>
-                </div>
-                <div id="card-name" class="card-name glass-badge"></div>
-            </div>
-            
-            <div class="glow-aura"></div>
-            <div class="card-char" id="card-char"></div>
-            
-            <div class="card-bottom-panel glass-badge">
-                <div id="card-faction-display" class="card-faction"></div>
-                <div class="card-message" id="card-message"></div>
-            </div>
-        </div>
-        
-        <div class="btn-group">
-            <button class="action-btn btn-restart" onclick="resetGame()">重新挑戰</button>
-            <a href="https://www.staracademy.com.tw/2027-winter-camp" target="_blank" class="action-btn btn-camp">前往S總部</a>
-            <button class="action-btn btn-board" onclick="showLeaderboard()">英雄榜</button>
-            
-            <button class="action-btn btn-copy" onclick="copyUrl()">點擊複製網址，叫朋友來挑戰吧！</button>
-        </div>
-        
-        <!-- 結算專屬底部 LOGO -->
-        <img src="https://lh3.googleusercontent.com/d/1ubF5fJs6JEBhojrfEH0nNKwSwCOtSgpu" class="end-logo" alt="logo">
-        
-    </div>
-</div>
-
-<script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyS_JY-Eh6JlSm1ZXh2DKbpDU6k0fgGzvVdhmpQYLXHUbHm-nju5w2uuLnh4glYMK0A2g/exec";
 
     let score = 0, mistakes = 0, timeRemaining = 30.0;
@@ -481,6 +337,36 @@
     
     const totalTargets = 76; 
     let targetsSpawned = 0, spawnQueue = [];
+
+    // 直接讀取跟 index.html 放在同一個 GitHub 資料夾下的 7 個音檔 (注意 Boom.mp3 大小寫)
+    const audioContext = {
+        final: new Audio("./final.mp3"),
+        gg: new Audio("./gg.mp3"),
+        ouch: new Audio("./ouch.mp3"),
+        hit: new Audio("./hit.mp3"),
+        next: new Audio("./next.mp3"),
+        go: new Audio("./go.mp3"),
+        boom: new Audio("./Boom.mp3")
+    };
+
+    // 預先加載音頻
+    Object.values(audioContext).forEach(audio => {
+        audio.preload = "auto";
+    });
+
+    function playSound(type) {
+        try {
+            if (type === 'hit' || type === 'ouch') {
+                const clone = audioContext[type].cloneNode();
+                clone.play().catch(e => console.log('Audio error:', e));
+            } else {
+                audioContext[type].currentTime = 0;
+                audioContext[type].play().catch(e => console.log('Audio error:', e));
+            }
+        } catch (error) {
+            console.log("Audio play error", error);
+        }
+    }
 
     function showSetup() {
         playSound('next');
@@ -545,6 +431,7 @@
                 cdText.innerText = count;
             } else if(count === 0) {
                 cdText.innerText = "GO!";
+                playSound('go'); // 裁判哨聲響起！
             } else {
                 clearInterval(iv);
                 cdScreen.classList.remove('active');
@@ -633,7 +520,11 @@
         clearInterval(gameTimer);
         clearInterval(spawnerTimer);
         
-        playSound('gg');
+        // 炸彈引爆！播放 Boom，一秒後播放 gg
+        playSound('boom');
+        setTimeout(() => {
+            playSound('gg');
+        }, 1000);
         
         const flash = document.createElement('div');
         flash.style.position = 'fixed'; flash.style.top = '0'; flash.style.left = '0';
