@@ -324,6 +324,36 @@
     <img src="https://lh3.googleusercontent.com/d/1JvUAx5ZcQHUAljDG-QvOjKnJabYczGQj">
 </div>
 
+<!-- ================== JavaScript 跨域音效引擎 ================== -->
+<script>
+    const audioContext = {
+        final: new Audio("https://drive.google.com/uc?export=download&id=1dfl7xQll6YtIKaaawNh_H2JGo4e8XcUe"),
+        gg: new Audio("https://drive.google.com/uc?export=download&id=1S6qqXqE6-7yE9THZ8gsX5_wCUwJ61iOz"),
+        ouch: new Audio("https://drive.google.com/uc?export=download&id=1nrTPbNwGqVNVHn4nVslgcKIn0dPIiymC"),
+        hit: new Audio("https://drive.google.com/uc?export=download&id=1yUjkmWvPjh5jWtFCvLUgBqSb5xWwEQ4o"),
+        next: new Audio("https://drive.google.com/uc?export=download&id=1G4KEtZNqdLFYUA93-gfpW4EpSjyYnpbR")
+    };
+
+    Object.values(audioContext).forEach(audio => {
+        audio.crossOrigin = "anonymous";
+        audio.preload = "auto";
+    });
+
+    function playSound(type) {
+        try {
+            if (type === 'hit' || type === 'ouch') {
+                const clone = audioContext[type].cloneNode();
+                clone.play().catch(e => console.log('Audio overlap blocked by browser', e));
+            } else {
+                audioContext[type].currentTime = 0;
+                audioContext[type].play().catch(e => console.log('Audio blocked by browser policy', e));
+            }
+        } catch (error) {
+            console.log("Audio play error", error);
+        }
+    }
+</script>
+
 <!-- 排行榜浮動視窗 -->
 <div id="leaderboard-modal">
     <div class="board-container">
@@ -365,7 +395,7 @@
 
     <!-- 第三步：故事背景頁面 -->
     <div id="story-screen" class="screen">
-        <button class="glass-play-btn" onclick="showRules()">NEXT ➔</button>
+        <button class="glass-play-btn" onclick="showRules()">NEXT ➡</button>
     </div>
 
     <!-- 第四步：規則頁面 -->
@@ -452,12 +482,14 @@
     let targetsSpawned = 0, spawnQueue = [];
 
     function showSetup() {
+        playSound('next');
         document.getElementById('cover-screen').classList.remove('active');
         document.getElementById('setup-screen').classList.add('active');
     }
 
     document.querySelectorAll('.char-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
+            playSound('next');
             
             document.querySelectorAll('.char-btn').forEach(b => {
                 b.classList.remove('selected');
@@ -485,16 +517,19 @@
         if(!chosenColor) { alert("請先選擇一位特務夥伴！"); return; }
         if(!document.getElementById('playerName').value) { alert("請輸入特務代號！"); return; }
         
+        playSound('next');
         document.getElementById('setup-screen').classList.remove('active');
         document.getElementById('story-screen').classList.add('active');
     }
     
     function showRules() {
+        playSound('next');
         document.getElementById('story-screen').classList.remove('active');
         document.getElementById('rules-screen').classList.add('active');
     }
 
     function startCountdown() {
+        playSound('next');
         document.getElementById('rules-screen').classList.remove('active');
         const cdScreen = document.getElementById('countdown-screen');
         cdScreen.classList.add('active');
@@ -597,6 +632,8 @@
         clearInterval(gameTimer);
         clearInterval(spawnerTimer);
         
+        playSound('gg');
+        
         const flash = document.createElement('div');
         flash.style.position = 'fixed'; flash.style.top = '0'; flash.style.left = '0';
         flash.style.width = '100vw'; flash.style.height = '100vh';
@@ -627,6 +664,9 @@
         if(type === 'boss') {
             hits++;
             targetEl.dataset.hits = hits;
+            
+            playSound('hit');
+            
             const splat = document.createElement('div');
             splat.className = 'splat';
             splat.style.background = chosenColor;
@@ -647,6 +687,7 @@
         if(type.startsWith('cat')) {
             mistakes++;
             score -= 1; 
+            playSound('ouch');
             document.getElementById('mistake-display').innerText = mistakes;
             document.getElementById('score-display').innerText = score;
             floatTxt.innerText = "Oh Sorry Friend! -1";
@@ -654,6 +695,8 @@
         } else {
             if(type === 'boss') score += 2;
             else score += 1;
+            
+            playSound('hit');
             
             document.getElementById('score-display').innerText = score;
             floatTxt.innerText = type === 'boss' ? "+2" : "+1";
@@ -686,6 +729,8 @@
     function endGame() {
         clearInterval(gameTimer);
         clearInterval(spawnerTimer);
+        
+        playSound('final');
         
         document.getElementById('time-display').classList.remove('time-urgent');
         document.getElementById('global-logo').style.display = 'none';
@@ -729,6 +774,7 @@
     }
 
     function resetGame() {
+        playSound('next');
         clearInterval(gameTimer);
         clearInterval(spawnerTimer);
         
@@ -772,6 +818,7 @@
     }
 
     async function showLeaderboard() {
+        playSound('next');
         const modal = document.getElementById('leaderboard-modal');
         const list = document.getElementById('leaderboard-list');
         modal.style.display = 'flex';
@@ -819,10 +866,12 @@
     }
     
     function closeLeaderboard() {
+        playSound('next');
         document.getElementById('leaderboard-modal').style.display = 'none';
     }
 
     function copyUrl() {
+        playSound('next');
         navigator.clipboard.writeText(window.location.href).then(() => {
             alert("網址已成功複製！快去邀請朋友一起挑戰吧！");
         }).catch(err => {
